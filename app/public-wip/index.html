@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="favicon.ico" />
+    <meta name="viewport" content="minimal-ui, width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Simple AI chatbot for MWasyluk.pl website."
+    />
+    <link rel="apple-touch-icon" href="logo192.png" />
+    <link rel="manifest" href="manifest.json" />
+    <title>AiBot - MWasyluk.pl</title>
+  </head>
+  <body>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+
+        --s: 132px;
+        --c1: #2d2d2d;
+        --c2: #000000;
+        --c3: #161616;
+        --_g: var(--c3) 0 120deg,#0000 0;
+        background:
+          conic-gradient(from -60deg at 50% calc(100%/3),var(--_g)),
+          conic-gradient(from 120deg at 50% calc(200%/3),var(--_g)),
+          conic-gradient(from  60deg at calc(200%/3),var(--c3) 60deg,var(--c2) 0 120deg,#0000 0),
+          conic-gradient(from 180deg at calc(100%/3),var(--c1) 60deg,var(--_g)),
+          linear-gradient(90deg,var(--c1)   calc(100%/6),var(--c2) 0 50%,
+                                var(--c1) 0 calc(500%/6),var(--c2) 0);
+        background-size: calc(1.732*var(--s)) var(--s);
+
+        text-align: center;
+        color: white;
+      }
+
+      .logo {
+        width: 600px;
+        max-width: 90%;
+      }
+
+      h1 {
+        font-size: 2rem;
+        margin: 1rem 0;
+      }
+
+      p {
+        font-size: 1.2rem;
+        margin: 0;
+      }
+    </style>
+    <div>
+      <h1>Bot needs to recharge its batteries...</h1>
+      <img src="animated-robot-charging.svg" alt="Logo" class="logo">
+      <p>Work is currently underway to improve AiBot. Sorry for the inconvenience...</p>
+    </div>
+  </body>
+</html>
