@@ -69,7 +69,7 @@ const Title = styled.h1``;
 
 function App() {
     const [currentTheme, setCurrentTheme] = useState(lightTheme);
-    const { data: models } = useFetch({url: `http://127.0.0.1:${process.env.AIBOT_API_PORT}/models`});
+    const { data: models } = useFetch({url: `http://127.0.0.1:${process.env.REACT_APP_AIBOT_API_PORT}/models`});
     const [model, setModel] = useState(null);
 
     const toggleTheme = () => {
