@@ -3,7 +3,7 @@ const { GoogleAuth } = require('google-auth-library');
 const { TextServiceClient } = require('@google-ai/generativelanguage').v1beta2;
 
 const client = new TextServiceClient({
-  authClient: new GoogleAuth().fromAPIKey(process.env.GOOGLE_API_KEY),
+  authClient: new GoogleAuth().fromAPIKey(process.env.AIBOT_GOOGLE_KEY),
 });
 
 async function askPalm(prompt){
@@ -15,7 +15,7 @@ async function askPalm(prompt){
 
 // Gemini implementation
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+const genAI = new GoogleGenerativeAI(process.env.AIBOT_GOOGLE_KEY);
 
 async function askGemini(prompt){
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});

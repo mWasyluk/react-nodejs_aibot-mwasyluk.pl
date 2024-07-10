@@ -81,7 +81,8 @@ function Chat(props) {
         setInput(""); 
     
         const newPrompt = prepareContextPrompt(content, messages);
-        const url = 'http://localhost:3001/ask';
+        const url = `http://127.0.0.1:${process.env.AIBOT_API_PORT}/ask`;
+        
         const method = 'POST';
         const body = { prompt: newPrompt, model };
 

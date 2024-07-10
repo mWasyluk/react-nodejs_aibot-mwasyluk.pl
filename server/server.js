@@ -3,11 +3,11 @@ const cors = require('cors');
 const { modelsView, models } = require('./models');
 
 const app = express();
-const port = 3001; 
+const port = process.env.AIBOT_API_PORT; 
 
 // CORS config
 const corsOptions = {
-    origin: 'http://localhost:3000', 
+    origin: `http://127.0.0.1:${process.env.AIBOT_APP_PORT}`, 
     optionsSuccessStatus: 200 
 };
   

@@ -10,8 +10,8 @@ import { darkTheme, lightTheme } from './theme';
 
 const AppWrapper = styled.div`
     display: flex;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     
     padding: 16px;
     
@@ -69,7 +69,7 @@ const Title = styled.h1``;
 
 function App() {
     const [currentTheme, setCurrentTheme] = useState(lightTheme);
-    const { data: models } = useFetch({url: 'http://localhost:3001/models'});
+    const { data: models } = useFetch({url: `http://127.0.0.1:${process.env.AIBOT_API_PORT}/models`});
     const [model, setModel] = useState(null);
 
     const toggleTheme = () => {
