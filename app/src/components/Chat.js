@@ -81,7 +81,7 @@ function Chat(props) {
         setInput(""); 
     
         const newPrompt = prepareContextPrompt(content, messages);
-        const url = `http://127.0.0.1:${process.env.REACT_APP_AIBOT_API_PORT}/ask`;
+        const url = `${process.env.REACT_APP_AIBOT_API_URL}/ask`;
         
         const method = 'POST';
         const body = { prompt: newPrompt, model };

@@ -7,7 +7,7 @@ const port = process.env.AIBOT_API_PORT;
 
 // CORS config
 const corsOptions = {
-    origin: `http://127.0.0.1:${process.env.AIBOT_APP_PORT}`, 
+    origin: process.env.AIBOT_APP_URL, 
     optionsSuccessStatus: 200 
 };
   
