@@ -35,8 +35,6 @@ app.post('/ask', async (req, res) => {
       return;
     }
 
-    console.log(prompt)
-
     const result = await model.sendPrompt(prompt);
 
     if (!result){
