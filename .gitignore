@@ -1,0 +1,5 @@
+deploy/mount
+deploy/*.service
+deploy/aibot
+
+desktop.ini
