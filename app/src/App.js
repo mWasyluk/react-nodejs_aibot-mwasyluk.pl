@@ -7,6 +7,7 @@ import ModelSelect from './components/ModelSelect';
 import { cubicBackground } from './styles/background';
 import useFetch from './hooks/useFetch';
 import { darkTheme, lightTheme } from './theme';
+import { MODELS_URL } from './utils/api-util';
 
 const AppWrapper = styled.div`
     display: flex;
@@ -69,7 +70,7 @@ const Title = styled.h1``;
 
 function App() {
     const [currentTheme, setCurrentTheme] = useState(lightTheme);
-    const { data: models } = useFetch({url: `${process.env.REACT_APP_AIBOT_API_URL}/models`});
+    const { data: models } = useFetch({url: MODELS_URL});
     const [model, setModel] = useState(null);
 
     const toggleTheme = () => {

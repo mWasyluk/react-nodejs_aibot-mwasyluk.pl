@@ -5,6 +5,7 @@ import useFetch from "../hooks/useFetch";
 import { prepareContextPrompt } from "../utils/prompt-util";
 import MarkdownContent from "./MarkdownContent";
 import SendMessageButton from "./SendMessageButton";
+import { QUERY_URL } from "../utils/api-util";
 
 const Container = styled.div`
     display: flex;
@@ -81,7 +82,7 @@ function Chat(props) {
         setInput(""); 
     
         const newPrompt = prepareContextPrompt(content, messages);
-        const url = `${process.env.REACT_APP_AIBOT_API_URL}/ask`;
+        const url = QUERY_URL;
         
         const method = 'POST';
         const body = { prompt: newPrompt, model };
