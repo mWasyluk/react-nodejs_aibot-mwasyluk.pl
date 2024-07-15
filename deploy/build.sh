@@ -11,18 +11,7 @@ else
     echo "INFO: AIBOT_ROOT_DIR is set to $AIBOT_ROOT_DIR"
 fi
 
-# Check if the AIBOT_DEPLOY_DIR environment variable is set 
-if [ -z "$AIBOT_DEPLOY_DIR" ]; then
-    echo "ERROR: The AIBOT_DEPLOY_DIR environment variable is not set. Exiting..."
-    exit 1
-else 
-    echo "INFO: AIBOT_DEPLOY_DIR is set to $AIBOT_DEPLOY_DIR"
-
-    if [ ! -d "$AIBOT_DEPLOY_DIR" ]; then
-        echo "INFO: $AIBOT_DEPLOY_DIR does not exist - creating..."
-        mkdir -p "$AIBOT_DEPLOY_DIR"
-    fi
-fi
+AIBOT_DEPLOY_DIR="$AIBOT_ROOT_DIR/deploy"
 
 # Prepare the app and server directories in the deploy directory
 echo "INFO: Preparing $AIBOT_DEPLOY_DIR/app and $AIBOT_DEPLOY_DIR/server directories..."

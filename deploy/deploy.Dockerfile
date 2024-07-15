@@ -6,7 +6,8 @@ RUN npm install -g npm@latest
 # Copy the bash script responsible for preparing and starting the app to the container
 # Remember to place the deploy.sh file in the build context
 COPY deploy.sh /deploy.sh
-COPY aibot /aibot
+COPY app /aibot/app
+COPY server /aibot/server
 
 WORKDIR /aibot
 ENV AIBOT_DEPLOY_DIR /aibot
