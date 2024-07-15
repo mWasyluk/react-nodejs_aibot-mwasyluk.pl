@@ -99,6 +99,8 @@ Note: As with Option 1, if you're using different port mappings or a proxy, you'
 
 Important: Always ensure that you set the `AIBOT_GOOGLE_KEY` environment variable with your Google API key when running the container.
 
+You can find more about the image and its tags on Docker Hub at [mwas0122/aibot](https://hub.docker.com/repository/docker/mwas0122/aibot/general).
+
 ---
 
 <div align="center">
