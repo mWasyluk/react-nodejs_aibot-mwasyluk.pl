@@ -10,12 +10,14 @@ const corsOptions = {
     origin: process.env.AIBOT_APP_URL, 
     optionsSuccessStatus: 200 
 };
-  
+
 app.use(cors(corsOptions));
 app.use(express.json());
 
+const router = express.Router();
+
 // Get all available models
-app.get('/models', async (req, res) => {
+router.get('/models', async (req, res) => {
   try {
     res.json(modelsView);
   } catch (error) {
@@ -25,7 +27,7 @@ app.get('/models', async (req, res) => {
 });
 
 // Send prompt to model and return its answer
-app.post('/ask', async (req, res) => {
+router.post('/ask', async (req, res) => {
   try {
     const prompt = req.body.prompt;
     const model = models.filter(model => model.id === req.body.model?.id)[0];
@@ -49,7 +51,8 @@ app.post('/ask', async (req, res) => {
   }
 });
 
-// Start listening for requests
+// Start listening for requests on /api/*
+app.use('/api', router);
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
