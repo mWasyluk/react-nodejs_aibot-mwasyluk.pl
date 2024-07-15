@@ -20,12 +20,13 @@ else
 
     if [ ! -d "$AIBOT_DEPLOY_DIR" ]; then
         echo "INFO: $AIBOT_DEPLOY_DIR does not exist - creating..."
-        mkdir -p "$AIBOT_DEPLOY_DIR/app" "$AIBOT_DEPLOY_DIR/server"
+        mkdir -p "$AIBOT_DEPLOY_DIR"
     fi
 fi
 
-# Clean the app and server directories in the deploy directory
-echo "INFO: Cleaning $AIBOT_DEPLOY_DIR/app and $AIBOT_DEPLOY_DIR/server directories..."
+# Prepare the app and server directories in the deploy directory
+echo "INFO: Preparing $AIBOT_DEPLOY_DIR/app and $AIBOT_DEPLOY_DIR/server directories..."
+mkdir -p "$AIBOT_DEPLOY_DIR/app" "$AIBOT_DEPLOY_DIR/server"
 rm -rf "$AIBOT_DEPLOY_DIR/app"/* "$AIBOT_DEPLOY_DIR/server"/*
 
 # Copy the server files to the deploy directory
