@@ -6,66 +6,23 @@
 
 *An intelligent conversational AI powered by Google's language models*
 
-[Node.js, React, Express, MUI, Styled Components, Nginx]
+https://aibot.mwasyluk.pl
 
 </div>
 
 ## 🌟 Features
 
 - 🧠 Powered by Google's Gemini and PaLM 2 language models
+- 💬 Engaging in both casual and deep intellectual discussions
+- 🤯 Meaningful conversations across a wide range of topics
 - 🔄 Dynamic model switching during conversations
 - 🌓 Light and dark mode support
-- 💬 Engaging in both casual and deep intellectual discussions
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React, MUI, styled-components
-- **Backend**: Express.js
-- **Deployment**: Nginx on VPS, systemctl for background process management
-
-## 🚀 Quick Start
-
-1. Clone the repository and navigate to the project directory:
-   ```bash
-    git clone https://github.com/mWasyluk/react-nodejs_aibot-mwasyluk.pl.git
-    cd react-nodejs_aibot-mwasyluk.pl
-   ```
-
-3. Set up the frontend:
-   ```bash
-    cd app/
-    npm install -g npm@latest
-    npm install
-    npm run build
-    npm install -g serve
-    ```
-
-5. Set up the backend:
-   ```bash
-    cd ../server/
-    npm install
-   ```
-
-7. Set the required environment variables:
-   ```bash
-    export AIBOT_API_URL='your_api_url'
-    export GOOGLE_AUTH_KEY='your_google_auth_key'
-   ```
-
-9. Start the application:
-    ```bash
-    cd ../app/
-    serve -s build -l 3000 &
-    cd ../server/
-    node server.js
-    ```
-
-Note: Make sure to set the required environment variables (`AIBOT_API_URL` and `GOOGLE_AUTH_KEY`) before running the application and server.
-
-
-## 🎨 UI/UX
-
-The project utilizes Material-UI (MUI) as the primary components provider and styled-components for custom styling. This combination allows for a sleek, responsive, and customizable user interface.
+- **Frontend**: JavaScript, React, MUI, styled-components
+- **Backend**: JavaScript, Express.js
+- **Deployment**: Git, Docker, Nginx
 
 ## 🧠 AI Models
 
@@ -76,20 +33,73 @@ AiBot leverages two powerful language models from Google:
 
 Users can seamlessly switch between these models during a conversation, allowing for diverse perspectives and capabilities within the same chat session.
 
-## 🌐 Deployment
 
-The application is hosted on a VPS using Nginx as the web server. The Express.js backend acts as a middleware between the React frontend and Google's AI services. systemctl ensures the application runs continuously in the background.
+## 🚀 Quick Start
 
-## 💡 Use Cases
+### Option 1: Docker Setup
 
-Whether you're looking for:
+1. Create and navigate to the project directory
 
-- 🎭 Casual chitchat
-- 🔬 In-depth discussions on quantum physics
-- 🤔 Philosophical debates
-- 🤯 And many, many more...
+   ```bash
+   mkdir -p /path/to/your/project
+   cd /path/to/your/project
+   ```
 
-AiBot is equipped to engage in meaningful conversations across a wide range of topics.
+2. Clone the repository:
+   ```bash
+   git clone https://github.com/mWasyluk/react-nodejs_aibot-mwasyluk.pl.git ./
+   ```
+
+3. Build the Docker image:
+   ```bash
+   cd deploy/
+   AIBOT_ROOT_DIR=/path/to/your/project bash build.sh
+   docker build -t aibot -f deploy.Dockerfile .
+   ```
+
+4. Run the Docker container:
+   ```bash
+   docker run --name aibot --restart unless-stopped -d -p 3000:3000 -p 3001:3001 \
+   -e AIBOT_GOOGLE_KEY=your_google_key \
+   aibot
+   ```
+
+   Note: If you're mapping the container ports to different host ports or using a proxy (e.g., Nginx with proxy_pass), you'll need to set `AIBOT_API_URL` and `AIBOT_APP_URL`:
+
+   ```bash
+   docker run --name aibot --restart unless-stopped -d -p 3002:3000 -p 3003:3001 \
+   -e AIBOT_APP_URL=http://localhost:3002 \
+   -e AIBOT_API_URL=http://localhost:3003/api \
+   -e AIBOT_GOOGLE_KEY=your_google_key \
+   aibot
+   ```
+
+   or
+   
+   ```bash
+   docker run --name aibot --restart unless-stopped -d -p 3000:3000 -p 3001:3001 \
+   -e AIBOT_APP_URL=https://your.domain.com \
+   -e AIBOT_API_URL=https://your.domain.com/api \
+   -e AIBOT_GOOGLE_KEY=your_google_key \
+   aibot
+   ```
+   
+
+### Option 2: Using Pre-built Docker Image
+
+You can also use the pre-built Docker image from the repository:
+
+```bash
+docker run --name aibot --restart unless-stopped -d -p 3000:3000 -p 3001:3001 \
+-e AIBOT_GOOGLE_KEY=your_google_key \
+mwas0122/aibot:1.0.0-build
+```
+
+Note: As with Option 1, if you're using different port mappings or a proxy, you'll need to set `AIBOT_API_URL` and `AIBOT_APP_URL` accordingly.
+
+Important: Always ensure that you set the `AIBOT_GOOGLE_KEY` environment variable with your Google API key when running the container.
+
+You can find more about the image and its tags on Docker Hub at [mwas0122/aibot](https://hub.docker.com/repository/docker/mwas0122/aibot/general).
 
 ---
 
