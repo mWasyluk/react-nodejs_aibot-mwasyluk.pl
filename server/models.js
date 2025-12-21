@@ -1,37 +1,27 @@
-// PaLM 2 implementation
-const { GoogleAuth } = require('google-auth-library');
-const { TextServiceClient } = require('@google-ai/generativelanguage').v1beta2;
+const { MODELS } = require("./models.config");
+const { askModel, getRiddle } = require("./models-nostream");
+const { askModelStream } = require("./models-stream");
 
-const client = new TextServiceClient({
-  authClient: new GoogleAuth().fromAPIKey(process.env.AIBOT_GOOGLE_KEY),
-});
+// Budujemy obiekty modeli w jednym miejscu
+const modelObjects = Object.values(MODELS)
+  .filter((model) => !model.disabled)
+  .map((model, i) => ({
+    ...model,
+    id: i,
+    // stare API – jednorazowa odpowiedź
+    sendPrompt: (prompt) => askModel(prompt, model.modelName),
+    // nowe API – async generator dla streamingu
+    sendPromptStream: (prompt) => askModelStream(prompt, model.modelName),
+  }));
 
-async function askPalm(prompt){
-  return await client.generateText({
-    model: 'models/text-bison-001',
-    prompt: { text: prompt },
-  }).then(result => result[0].candidates[0]?.output);
-}
+// Zachowujemy to samo zachowanie co wcześniej:
+// actions.riddle to PROMISE, odpalony przy starcie serwera.
+const riddlePromise = getRiddle();
 
-// Gemini implementation
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const genAI = new GoogleGenerativeAI(process.env.AIBOT_GOOGLE_KEY);
-
-async function askGemini(prompt){
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
-  return await model.generateContent([
-      prompt,
-      // {inlineData: {data: Buffer.from(fs.readFileSync('path/to/image.png')).toString("base64"),
-      // mimeType: 'image/png'}}
-  ]).then(result => result.response.text());
-}
-
-// Models
-const models = [
-  {id: 0, title: 'Gemini/1.5-flash (recommended)', sendPrompt: async (prompt) => askGemini(prompt)},
-  {id: 1, title: 'PaLM2/bison-001', sendPrompt: async (prompt) => askPalm(prompt)},
-];
-
-const modelsView = models.map((model) => ({id: model.id, title: model.title}));
-
-module.exports = {models, modelsView} ;
+module.exports = {
+  models: modelObjects,
+  actions: { riddle: riddlePromise },
+  // Przy okazji eksportujemy funkcje, jakby backend miał je kiedyś wołać bezpośrednio
+  askModel,
+  askModelStream,
+};

@@ -16,7 +16,7 @@ AIBOT_DEPLOY_DIR="$AIBOT_ROOT_DIR/deploy"
 # Prepare the app and server directories in the deploy directory
 echo "INFO: Preparing $AIBOT_DEPLOY_DIR/app and $AIBOT_DEPLOY_DIR/server directories..."
 mkdir -p "$AIBOT_DEPLOY_DIR/app" "$AIBOT_DEPLOY_DIR/server"
-rm -rf "$AIBOT_DEPLOY_DIR/app"/* "$AIBOT_DEPLOY_DIR/server"/*
+rm -rf "$AIBOT_DEPLOY_DIR/app"/*
 
 # Copy the server files to the deploy directory
 cd "$AIBOT_ROOT_DIR/server"

@@ -1,5 +1,7 @@
 deploy/mount
 deploy/*.service
-deploy/aibot
+deploy/app
+deploy/logs
+deploy/server
 
 desktop.ini

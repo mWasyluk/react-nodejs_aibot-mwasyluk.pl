@@ -2,7 +2,8 @@
 
 # Check if the required environment variables are set
 required_vars=(
-    "AIBOT_GOOGLE_KEY"
+    "AIBOT_GOOGLE_KEY",
+    "AIBOT_OLLAMA_KEY"
 )
 
 allProvided=true

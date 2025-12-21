@@ -14,6 +14,7 @@
         "@google/generative-ai": "^0.14.1",
         "cors": "^2.8.5",
         "express": "^4.19.2",
-        "google-auth-library": "^9.11.0"
+        "google-auth-library": "^9.11.0",
+        "ollama": "^0.6.3"
     }
 }

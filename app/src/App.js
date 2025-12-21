@@ -8,6 +8,7 @@ import { cubicBackground } from './styles/background';
 import useFetch from './hooks/useFetch';
 import { darkTheme, lightTheme } from './theme';
 import { MODELS_URL } from './utils/api-util';
+import { useLLM } from './context/LLMContext';
 
 const AppWrapper = styled.div`
     display: flex;
@@ -71,7 +72,8 @@ const Title = styled.h1``;
 function App() {
     const [currentTheme, setCurrentTheme] = useState(lightTheme);
     const { data: models } = useFetch({url: MODELS_URL});
-    const [model, setModel] = useState(null);
+    // const [model, setModel] = useState(null);
+    const { model, setModel } = useLLM();
 
     const toggleTheme = () => {
       setCurrentTheme(currentTheme === darkTheme ? lightTheme : darkTheme);
@@ -99,7 +101,7 @@ function App() {
                             {currentTheme === darkTheme ? <LightMode /> : <DarkMode />}
                         </IconButton>
                     </Header>
-                    <Chat model={model}/>
+                    <Chat/>
                 </AppContent>
             </AppWrapper>
       </ThemeProvider>

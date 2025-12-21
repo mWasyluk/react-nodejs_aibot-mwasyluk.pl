@@ -5,7 +5,11 @@ import useFetch from "../hooks/useFetch";
 import { prepareContextPrompt } from "../utils/prompt-util";
 import MarkdownContent from "./MarkdownContent";
 import SendMessageButton from "./SendMessageButton";
-import { QUERY_URL } from "../utils/api-util";
+import { QUERY_URL, STREAM_URL } from "../utils/api-util";
+import ActionsContainer from "./ActionsContainer";
+import { useLLM } from "../context/LLMContext";
+import ThinkingText from "./ThinkingText";
+import FinalText from "./FinalText";
 
 const Container = styled.div`
     display: flex;
@@ -59,10 +63,21 @@ const Row = styled.div`
     height: fit-content;
 `;
 
-function Chat(props) {
-    const { model } = props;
+function Chat() {
+    const {
+        thinkingText,
+        finalText,
+        status,
+        // error,
+        startStream,
+        stopStream,
+        model,
+        setModel,
+    } = useLLM();
+
     const [input, setInput] = useState("");
     const [messages, setMessages] = useState([]);
+    const [actions, setActions] = useState([{title: "Ask riddle", isHover: false}]);
     const theme = useTheme();
 
     const { data, isLoading, error, fetchData } = useFetch();
@@ -82,12 +97,24 @@ function Chat(props) {
         setInput(""); 
     
         const newPrompt = prepareContextPrompt(content, messages);
-        const url = QUERY_URL;
+        // const url = QUERY_URL;
+        // const url = STREAM_URL;
         
-        const method = 'POST';
-        const body = { prompt: newPrompt, model };
+        // const method = 'POST';
+        // const body = { prompt: newPrompt, model };
 
-        fetchData({url, method, body});
+        // fetchData({url, method, body});
+        startStream(newPrompt);
+    }
+
+    const callAction = async (actionCode) => {
+        if (actionCode?.toUpperCase() === "GOD"){
+            setInput("Kim jest według ciebie Bóg?");
+            // let isSet;
+            // while(!isSet){
+            //     await handleSend().then(() => isSet = true);
+            // }
+        }
     }
 
     useEffect(() => {
@@ -95,15 +122,23 @@ function Chat(props) {
             addMessage({content: data, source: 'out'});
         } else if (error) {
             addMessage({content: error, source: 'err'});
+        } else if (finalText && status === 'done'){
+            addMessage({content: finalText, source: 'out'});
         }
-    }, [data, isLoading, error]);
+    }, [data, isLoading, error, finalText, status]);
     
     return (
         <Container>
             <MessagesContainer>
                 <div className={`message loading`}></div>
+                {/* { finalText ? <div>Final: {finalText}</div> : <></>} */}
+                <ThinkingText key={'thinking-text'} />
+                <FinalText key={'final-text'}/>
                 {messages.map((message, i) => <MarkdownContent key={i} className={`message ${message.source}`}>{message.content}</MarkdownContent>)}
             </MessagesContainer>
+            {!messages.length ? (
+                <ActionsContainer callAction={callAction}></ActionsContainer>
+            ): <></>}
             <Row>
                 <TextField
                     id="standard-textarea"
