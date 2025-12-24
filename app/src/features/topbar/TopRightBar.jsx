@@ -5,6 +5,7 @@ import { DarkMode, LightMode, Translate, Settings } from '@mui/icons-material';
 import { useTheme } from 'styled-components';
 import { useAppState } from '../../context/AppStateContext';
 import { LANGUAGE, THEME } from '../../state/constants';
+import { useI18n } from '../../hooks/useI18n';
 
 const Wrap = styled.div`
   display: flex;
@@ -15,6 +16,7 @@ const Wrap = styled.div`
 export default function TopRightBar() {
   const theme = useTheme();
   const { state, actions } = useAppState();
+  const { t } = useI18n();
 
   const toggleTheme = () =>
     actions.setTheme(state.ui.theme === THEME.DARK ? THEME.LIGHT : THEME.DARK);
@@ -24,19 +26,19 @@ export default function TopRightBar() {
 
   return (
     <Wrap>
-      <Tooltip title="Theme">
+      <Tooltip title={t.topbarThemeTooltip}>
         <IconButton onClick={toggleTheme} sx={{ color: theme.colors.text.primary }}>
           {state.ui.theme === THEME.DARK ? <LightMode /> : <DarkMode />}
         </IconButton>
       </Tooltip>
 
-      <Tooltip title={`Language: ${state.ui.language.toUpperCase()}`}>
+      <Tooltip title={`${t.topbarLanguageTooltip}: ${state.ui.language.toUpperCase()}`}>
         <IconButton onClick={toggleLang} sx={{ color: theme.colors.text.primary }}>
           <Translate />
         </IconButton>
       </Tooltip>
 
-      <Tooltip title="Settings (not wired yet)">
+      <Tooltip title={t.topbarSettingsTooltip}>
         <span>
           <IconButton disabled sx={{ color: theme.colors.text.primary }}>
             <Settings />

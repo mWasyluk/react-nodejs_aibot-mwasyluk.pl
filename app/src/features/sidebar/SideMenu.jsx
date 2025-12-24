@@ -3,6 +3,7 @@ import styled, { css } from 'styled-components';
 import { Add, Search, ArchiveOutlined, ChatBubbleOutline, MenuOpen } from '@mui/icons-material';
 import { IconButton, Tooltip } from '@mui/material';
 import { useAppState } from '../../context/AppStateContext';
+import { useI18n } from '../../hooks/useI18n';
 
 const Wrap = styled.aside`
   width: 320px;
@@ -148,22 +149,23 @@ function formatDate(ts) {
 
 export default function SideMenu() {
   const { state, actions, selectors } = useAppState();
+  const { t } = useI18n();
   const chats = useMemo(() => selectors.selectChatsList(state), [state, selectors]);
   const currentChatId = state.chats.currentChatId;
   const isOpen = !!state.ui.sideMenuOpen;
 
-  const onNewChat = () => actions.createChat({ title: 'New chat' });
+  const onNewChat = () => actions.createChat({ title: t.newChatDefaultTitle });
   const onToggle = () => actions.setSideMenuOpen(!isOpen);
 
   if (!isOpen) {
     return (
       <Collapsed>
-        <Tooltip title="Open menu">
+        <Tooltip title={t.sideOpenMenuTooltip}>
           <IconButton onClick={onToggle} size="small">
             <MenuOpen fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="New chat">
+        <Tooltip title={t.sideNewChatTooltip}>
           <IconButton onClick={onNewChat} size="small">
             <Add fontSize="small" />
           </IconButton>
@@ -175,19 +177,19 @@ export default function SideMenu() {
   return (
     <Wrap>
       <TopActions>
-        <Tooltip title="New chat">
+        <Tooltip title={t.sideNewChatTooltip}>
           <IconButton onClick={onNewChat} size="small">
             <Add fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Search (not wired yet)">
+        <Tooltip title={t.sideSearchTooltip}>
           <span>
             <IconButton disabled size="small">
               <Search fontSize="small" />
             </IconButton>
           </span>
         </Tooltip>
-        <Tooltip title="Archive (not wired yet)">
+        <Tooltip title={t.sideArchiveTooltip}>
           <span>
             <IconButton disabled size="small">
               <ArchiveOutlined fontSize="small" />
@@ -195,7 +197,7 @@ export default function SideMenu() {
           </span>
         </Tooltip>
         <div style={{ flex: 1 }} />
-        <Tooltip title="Collapse">
+        <Tooltip title={t.sideCollapseTooltip}>
           <IconButton onClick={onToggle} size="small">
             <MenuOpen fontSize="small" />
           </IconButton>
@@ -203,14 +205,14 @@ export default function SideMenu() {
       </TopActions>
 
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-        <Title>Chats</Title>
+        <Title>{t.sideChatsTitle}</Title>
         <div style={{ fontSize: 12, opacity: 0.65 }}>{chats.length}</div>
       </div>
 
       <List>
         {chats.length === 0 ? (
           <div style={{ fontSize: 13, opacity: 0.7, padding: '6px 4px' }}>
-            No chats yet. Humans love empty lists.
+            {t.sideNoChatsYet}
           </div>
         ) : (
           chats
@@ -224,7 +226,7 @@ export default function SideMenu() {
               >
                 <ChatBubbleOutline fontSize="small" style={{ opacity: 0.85 }} />
                 <ItemText>
-                  <ItemTitle>{c.title || 'Untitled'}</ItemTitle>
+                  <ItemTitle>{c.title || t.sideUntitledChat}</ItemTitle>
                   <ItemMeta>{formatDate(c.updatedAt)}</ItemMeta>
                 </ItemText>
               </Item>
@@ -234,8 +236,8 @@ export default function SideMenu() {
 
       <Footer>
         <UserBadge>
-          <UserName>Anonymous</UserName>
-          <UserHint>Local data</UserHint>
+          <UserName>{t.sideUserAnonymous}</UserName>
+          <UserHint>{t.sideUserLocalData}</UserHint>
         </UserBadge>
 
         {/* Placeholder for future user/actions */}
