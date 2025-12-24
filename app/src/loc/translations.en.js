@@ -21,6 +21,14 @@ export const en = Object.freeze({
   sideUntitledChat: 'Untitled',
   sideUserAnonymous: 'Anonymous',
   sideUserLocalData: 'Local data',
+  sideSearchCloseTooltip: 'Close search',
+  sideArchiveCloseTooltip: 'Back to recent',
+  sideSearchPlaceholder: 'Search chats…',
+  sideArchiveHint: 'Archived chats',
+  sideArchivedLabel: 'archived',
+  sideArchiveItemTooltip: 'Archive',
+  sideUnarchiveTooltip: 'Unarchive',
+  sideChangeChatTitleTooltip: 'Rename',
 
   // Generic
   newChatDefaultTitle: 'New chat',

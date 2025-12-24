@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
-import { Add, Search, ArchiveOutlined, ChatBubbleOutline, MenuOpen } from '@mui/icons-material';
-import { IconButton, Tooltip } from '@mui/material';
+import { Add, Search, ArchiveOutlined, UnarchiveOutlined, ChatBubbleOutline, MenuOpen, Close } from '@mui/icons-material';
+import CreateRoundedIcon from '@mui/icons-material/CreateRounded';
+import { IconButton, Tooltip, InputBase } from '@mui/material';
 import { useAppState } from '../../context/AppStateContext';
 import { useI18n } from '../../hooks/useI18n';
 
@@ -54,6 +55,36 @@ const Title = styled.div`
   user-select: none;
 `;
 
+
+const ModeHint = styled.div`
+  font-size: 12px;
+  opacity: 0.75;
+`;
+
+const SearchBar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 12px;
+
+  ${({ theme }) => css`
+    background: ${theme.colors.surface};
+    border: 1px solid ${theme.colors.border};
+  `}
+`;
+
+const SearchInput = styled(InputBase)`
+  flex: 1;
+  font-size: 13px;
+`;
+
+const ItemRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.8;
+`;
 const List = styled.div`
   flex: 1;
   overflow: auto;
@@ -154,8 +185,54 @@ export default function SideMenu() {
   const currentChatId = state.chats.currentChatId;
   const isOpen = !!state.ui.sideMenuOpen;
 
+  const [mode, setMode] = useState('recent'); // 'recent' | 'archived' | 'search'
+  const [query, setQuery] = useState('');
+
+  const normalizedQuery = query.trim().toLowerCase();
+
+  const filteredChats = useMemo(() => {
+    const base =
+      mode === 'archived'
+        ? chats.filter((c) => c.archived)
+        : mode === 'search'
+          ? chats
+          : chats.filter((c) => !c.archived);
+
+    if (mode !== 'search' || !normalizedQuery) return base;
+
+    return base.filter((c) => {
+      const title = String(c.title ?? '').toLowerCase();
+      if (title.includes(normalizedQuery)) return true;
+
+      // potem: filtr po treści messages (na start: dość prosto, ale działa)
+      const msgs = state.messages.byChatId[c.id] ?? [];
+      return msgs.some((m) => {
+        const finalText = String(m?.content?.final ?? '').toLowerCase();
+        const thinkingText = String(m?.content?.thinking ?? '').toLowerCase();
+        return finalText.includes(normalizedQuery) || thinkingText.includes(normalizedQuery);
+      });
+    });
+  }, [chats, mode, normalizedQuery, state.messages.byChatId]);
+
   const onNewChat = () => actions.createChat({ title: t.newChatDefaultTitle });
+  const invokeTitleChange = (chatId) => {
+    const next = window.prompt("New chat title:");
+    if (!next) return;
+    const title = next.trim();
+    if (!title) return;
+    actions.setChatTitle(chatId, title);
+  };
   const onToggle = () => actions.setSideMenuOpen(!isOpen);
+
+  const onToggleSearch = () => {
+    setQuery('');
+    setMode((m) => (m === 'search' ? 'recent' : 'search'));
+  };
+
+  const onToggleArchive = () => {
+    setQuery('');
+    setMode((m) => (m === 'archived' ? 'recent' : 'archived'));
+  };
 
   if (!isOpen) {
     return (
@@ -182,19 +259,15 @@ export default function SideMenu() {
             <Add fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title={t.sideSearchTooltip}>
-          <span>
-            <IconButton disabled size="small">
-              <Search fontSize="small" />
-            </IconButton>
-          </span>
+        <Tooltip title={mode === 'search' ? t.sideSearchCloseTooltip : t.sideSearchTooltip}>
+          <IconButton onClick={onToggleSearch} size="small">
+            {mode === 'search' ? <Close fontSize="small" /> : <Search fontSize="small" />}
+          </IconButton>
         </Tooltip>
-        <Tooltip title={t.sideArchiveTooltip}>
-          <span>
-            <IconButton disabled size="small">
-              <ArchiveOutlined fontSize="small" />
-            </IconButton>
-          </span>
+        <Tooltip title={mode === 'archived' ? t.sideArchiveCloseTooltip : t.sideArchiveTooltip}>
+          <IconButton onClick={onToggleArchive} size="small">
+            <ArchiveOutlined fontSize="small" style={{ opacity: mode === 'archived' ? 1 : 0.85 }} />
+          </IconButton>
         </Tooltip>
         <div style={{ flex: 1 }} />
         <Tooltip title={t.sideCollapseTooltip}>
@@ -206,32 +279,75 @@ export default function SideMenu() {
 
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
         <Title>{t.sideChatsTitle}</Title>
-        <div style={{ fontSize: 12, opacity: 0.65 }}>{chats.length}</div>
+        <div style={{ fontSize: 12, opacity: 0.65 }}>{filteredChats.length}</div>
       </div>
 
+
+      {mode === 'search' && (
+        <SearchBar>
+          <Search fontSize="small" style={{ opacity: 0.8 }} />
+          <SearchInput
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t.sideSearchPlaceholder}
+            inputProps={{ 'aria-label': t.sideSearchPlaceholder }}
+          />
+          {query ? (
+            <IconButton onClick={() => setQuery('')} size="small">
+              <Close fontSize="small" />
+            </IconButton>
+          ) : null}
+        </SearchBar>
+      )}
+
+      {mode === 'archived' && (
+        <ModeHint>{t.sideArchiveHint}</ModeHint>
+      )}
       <List>
         {chats.length === 0 ? (
           <div style={{ fontSize: 13, opacity: 0.7, padding: '6px 4px' }}>
             {t.sideNoChatsYet}
           </div>
         ) : (
-          chats
-            .filter((c) => !c.archived)
-            .map((c) => (
-              <Item
-                key={c.id}
-                $active={c.id === currentChatId}
-                onClick={() => actions.setCurrentChat(c.id)}
-                type="button"
-              >
-                <ChatBubbleOutline fontSize="small" style={{ opacity: 0.85 }} />
-                <ItemText>
-                  <ItemTitle>{c.title || t.sideUntitledChat}</ItemTitle>
-                  <ItemMeta>{formatDate(c.updatedAt)}</ItemMeta>
-                </ItemText>
-              </Item>
-            ))
-        )}
+          filteredChats.map((c) => (
+            <Item
+              key={c.id}
+              $active={c.id === currentChatId}
+              onClick={() => actions.setCurrentChat(c.id)}
+              type="button"
+            >
+              <ChatBubbleOutline fontSize="small" style={{ opacity: 0.85 }} />
+              <ItemText>
+                <ItemTitle>{c.title || t.sideUntitledChat}</ItemTitle>
+                <ItemMeta>
+                  {formatDate(c.updatedAt)}
+                  {mode === 'search' && c.archived ? ` · ${t.sideArchivedLabel}` : ''}
+                </ItemMeta>
+              </ItemText>
+
+              <ItemRight onClick={(e) => e.stopPropagation()}>
+                <Tooltip title={c.archived ? t.sideUnarchiveTooltip : t.sideArchiveItemTooltip}>
+                  <IconButton
+                    size="small"
+                    onClick={() => actions.archiveChat(c.id, !c.archived)}
+                  >
+                    {c.archived ? <UnarchiveOutlined fontSize="small" /> : <ArchiveOutlined fontSize="small" />}
+                  </IconButton>
+                </Tooltip>
+              </ItemRight>
+
+              <ItemRight onClick={(e) => e.stopPropagation()}>
+                <Tooltip title={t.sideChangeChatTitleTooltip}>
+                  <IconButton
+                    size="small"
+                    onClick={() => invokeTitleChange(c.id)}
+                  >
+                    <CreateRoundedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </ItemRight>
+            </Item>
+          )))}
       </List>
 
       <Footer>

@@ -64,6 +64,27 @@ export function setCurrentChat(state, setState, chatId) {
     });
 }
 
+export function setChatTitle(state, setState, chatId, newTitle) {
+    const chat = state.chats.byId[chatId];
+    if (!chat) return;
+
+    if (!newTitle || newTitle.length < 3) {
+        alert("New title <3, no no!")
+        return;
+    }
+
+    setState({
+        ...state,
+        chats: {
+            ...state.chats,
+            byId: {
+                ...state.chats.byId,
+                [chatId]: { ...chat, updatedAt: now(), title: newTitle },
+            },
+        },
+    });
+}
+
 export function archiveChat(state, setState, chatId, archived = true) {
     const chat = state.chats.byId[chatId];
     if (!chat) return;
