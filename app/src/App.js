@@ -1,7 +1,7 @@
 import { DarkMode, LightMode } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 import { useEffect, useState } from 'react';
-import styled, { ThemeProvider, css } from 'styled-components';
+import styled, { ThemeProvider, css, useTheme } from 'styled-components';
 import Chat from './components/Chat';
 import ModelSelect from './components/ModelSelect';
 import { cubicBackground } from './styles/background';
@@ -9,6 +9,8 @@ import useFetch from './hooks/useFetch';
 import { darkTheme, lightTheme } from './theme';
 import { MODELS_URL } from './utils/api-util';
 import { useLLM } from './context/LLMContext';
+import { useAppState } from './context/AppStateContext';
+import { THEME } from './state/constants';
 
 const AppWrapper = styled.div`
     display: flex;
@@ -17,7 +19,7 @@ const AppWrapper = styled.div`
     
     padding: 16px;
     
-    ${({theme}) => css`
+    ${({ theme }) => css`
         background-color: ${theme.colors.background};
 
         & * {
@@ -54,7 +56,7 @@ const AppContent = styled.div`
     
     padding: 16px;
 
-    ${({theme}) => css`
+    ${({ theme }) => css`
         background-color: ${theme.colors.surface}dd;
         border-radius: 16px;
         box-shadow: 0 0 8px 8px ${theme.colors.surface};
@@ -70,41 +72,38 @@ const Header = styled.header`
 const Title = styled.h1``;
 
 function App() {
-    const [currentTheme, setCurrentTheme] = useState(lightTheme);
-    const { data: models } = useFetch({url: MODELS_URL});
+    const theme = useTheme();
+    const { state, actions } = useAppState();
+    const { data: models } = useFetch({ url: MODELS_URL });
     // const [model, setModel] = useState(null);
     const { model, setModel } = useLLM();
 
-    const toggleTheme = () => {
-      setCurrentTheme(currentTheme === darkTheme ? lightTheme : darkTheme);
-    };
+    const toggleTheme = () => actions.setTheme(state.ui.theme === THEME.DARK ? THEME.LIGHT : THEME.DARK);
 
     useEffect(() => {
-        if (models && models.length > 0){
+        if (models && models.length > 0) {
             setModel(models[0]);
         }
     }, [models])
 
     return (
-      <ThemeProvider theme={currentTheme} >
-            <AppWrapper>
-                <AppContent>
-                    <Header>
-                        <Title>
-                            Welcome in AiBot!
-                        </Title>
-                        <ModelSelect models={models ? models : []} selectedModel={model} selectModel={setModel}/>
-                        <IconButton 
-                            onClick={toggleTheme} 
-                            style={{ color: currentTheme.colors.text.primary }}
-                            sx={{ height: 'fit-content'}}>
-                            {currentTheme === darkTheme ? <LightMode /> : <DarkMode />}
-                        </IconButton>
-                    </Header>
-                    <Chat/>
-                </AppContent>
-            </AppWrapper>
-      </ThemeProvider>
+        <AppWrapper>
+            <AppContent>
+                <Header>
+                    <Title>
+                        Welcome in AiBot!
+                    </Title>
+                    <ModelSelect models={models ? models : []} selectedModel={model} selectModel={setModel} />
+                    <IconButton
+                        onClick={toggleTheme}
+                        style={{ color: theme.colors.text.primary }}
+                        sx={{ height: 'fit-content' }}>
+                        {state.ui.theme === 'dark' ? <LightMode /> : <DarkMode />}
+                    </IconButton>
+                </Header>
+                <Chat />
+            </AppContent>
+        </AppWrapper>
     );
 }
 

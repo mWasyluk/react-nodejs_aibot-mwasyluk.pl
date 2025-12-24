@@ -3,14 +3,14 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { LLMProvider } from './context/LLMContext';
+import AppProviders from './context/AppProviders';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <LLMProvider apiBaseUrl="/api">
+    <AppProviders>
       <App />
-    </LLMProvider>
+    </AppProviders>
   </React.StrictMode>
 );
 
