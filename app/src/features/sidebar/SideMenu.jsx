@@ -84,6 +84,8 @@ const ItemRight = styled.div`
   align-items: center;
   gap: 4px;
   opacity: 0.8;
+  align-self: end;
+  justify-self: end;
 `;
 const List = styled.div`
   flex: 1;
@@ -130,6 +132,7 @@ const ItemText = styled.div`
   flex-direction: column;
   gap: 2px;
   min-width: 0;
+  width: 100%;
 `;
 
 const ItemTitle = styled.div`

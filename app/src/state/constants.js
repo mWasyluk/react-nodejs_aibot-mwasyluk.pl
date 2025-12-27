@@ -9,3 +9,11 @@ export const LANGUAGE = Object.freeze({
     PL: 'pl',
     EN: 'en',
 });
+
+/** @type {{ INFO: 'info', SUCCESS: 'success', WARNING: 'warning', ERROR: 'error' }} */
+export const NOTIFICATIONS = Object.freeze({
+    INFO: 'info',
+    SUCCESS: 'success',
+    WARNING: 'warning',
+    ERROR: 'error',
+});

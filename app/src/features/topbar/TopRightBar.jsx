@@ -7,6 +7,16 @@ import { useAppState } from '../../context/AppStateContext';
 import { LANGUAGE, THEME } from '../../state/constants';
 import { useI18n } from '../../hooks/useI18n';
 
+const ModelName = styled.div`
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.8;
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
 const Wrap = styled.div`
   display: flex;
   gap: 8px;
@@ -15,7 +25,8 @@ const Wrap = styled.div`
 
 export default function TopRightBar() {
   const theme = useTheme();
-  const { state, actions } = useAppState();
+  const { state, actions, selectors } = useAppState();
+  const model = selectors.selectSelectedModel(state);
   const { t } = useI18n();
 
   const toggleTheme = () =>
@@ -26,6 +37,8 @@ export default function TopRightBar() {
 
   return (
     <Wrap>
+      <ModelName>{model?.title ?? 'No model'}</ModelName>
+
       <Tooltip title={t.topbarThemeTooltip}>
         <IconButton onClick={toggleTheme} sx={{ color: theme.colors.text.primary }}>
           {state.ui.theme === THEME.DARK ? <LightMode /> : <DarkMode />}

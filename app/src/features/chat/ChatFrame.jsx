@@ -24,7 +24,7 @@ const Wrap = styled.section`
 const Header = styled.header`
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 12px;
   padding: 12px 14px;
 
@@ -37,6 +37,15 @@ const HeaderTitle = styled.div`
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
+  flex: 1;
+`;
+
+const HeaderTopRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   min-width: 0;
 `;
 
@@ -103,10 +112,12 @@ export default function ChatFrame() {
     <Wrap>
       <Header>
         <HeaderTitle>
-          <Title>{hasChat ? (chat.title || 'Untitled chat') : 'AiBot'}</Title>
+          <HeaderTopRow>
+            <Title>{hasChat ? (chat.title || 'Untitled chat') : 'AiBot'}</Title>
+            <TopRightBar />
+          </HeaderTopRow>
           <Subtitle>{hasChat ? 'Active conversation' : 'Start a new chat from the sidebar'}</Subtitle>
         </HeaderTitle>
-        <TopRightBar />
       </Header>
 
       <Body>

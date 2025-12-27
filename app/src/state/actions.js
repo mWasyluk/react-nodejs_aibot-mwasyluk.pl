@@ -169,7 +169,7 @@ export function upsertAssistantMessage(
             content: {
                 ...m.content,
                 final: nextFinal,
-                ...(contentThinking != null ? { thinking: contentThinking } : {}),
+                ...(contentThinking != null ? { thinking: m.content.thinking + contentThinking } : {}),
             },
         };
     });
@@ -202,6 +202,90 @@ export function upsertAssistantMessage(
     return id;
 }
 
+
+// -------- notifications --------
+/**
+ * @param {import('./types').AppState} state
+ * @param {(next: import('./types').AppState) => void} setState
+ */
+export function addNotification(state, setState, chatId, type, message) {
+    if (!chatId || !message?.trim()) return null;
+
+    const role = type === 'error' ? 'error' : 'system';
+
+    const msg = {
+        id: nanoid(),
+        role,
+        status: 'done',
+        createdAt: now(),
+        content: { final: message },
+    };
+
+    const prev = state.messages.byChatId[chatId] ?? [];
+    const nextMsgs = [...prev, msg];
+
+    setState({
+        ...state,
+        messages: {
+            ...state.messages,
+            byChatId: { ...state.messages.byChatId, [chatId]: nextMsgs },
+        },
+        chats: bumpChatUpdatedAt(state, chatId),
+    });
+
+    return msg.id;
+}
+
+// -------- assistant streaming helpers --------
+
+export function startAssistantMessage(state, setState, chatId, meta = {}) {
+    return upsertAssistantMessage(state, setState, chatId, {
+        messageId: meta.messageId ?? null,
+        status: meta.status ?? 'thinking',
+        modelId: meta.modelId ?? null,
+        contentFinal: '',
+        contentThinking: '',
+    });
+}
+
+export function appendAssistantDelta(state, setState, chatId, messageId, delta) {
+    return upsertAssistantMessage(state, setState, chatId, {
+        messageId,
+        status: 'streaming',
+        contentDelta: delta ?? '',
+    });
+}
+
+export function appendAssistantThinkingDelta(state, setState, chatId, messageId, delta) {
+    return upsertAssistantMessage(state, setState, chatId, {
+        messageId,
+        status: 'thinking',
+        contentThinking: delta ?? '',
+    });
+}
+
+export function finalizeAssistantMessage(state, setState, chatId, messageId) {
+    return upsertAssistantMessage(state, setState, chatId, {
+        messageId,
+        status: 'done',
+    });
+}
+
+export function cancelAssistantMessage(state, setState, chatId, messageId) {
+    return upsertAssistantMessage(state, setState, chatId, {
+        messageId,
+        status: 'cancelled',
+    });
+}
+
+export function errorAssistantMessage(state, setState, chatId, messageId) {
+    return upsertAssistantMessage(state, setState, chatId, {
+        messageId,
+        status: 'error',
+    });
+}
+
+
 export function setModelsRegistry(state, setState, registry) {
     // registry: [{id,label,provider,runtimeId}, ...]
     const statusesById = { ...state.models.statusesById };
@@ -215,7 +299,9 @@ export function setModelsRegistry(state, setState, registry) {
             ...state.models,
             registry,
             statusesById,
-            selectedModelId: state.models.selectedModelId ?? registry?.[0]?.id ?? null,
+            // selectedModelId: state.models.selectedModelId ?? registry?.[1]?.id ?? null,
+            selectedModelId: registry?.[0]?.id ?? null,
+            // },
         },
     });
 }

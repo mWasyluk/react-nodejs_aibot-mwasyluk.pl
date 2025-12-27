@@ -36,7 +36,7 @@ export const selectModelsRegistry = (state) => state.models.registry;
 /** @param {import('./types').AppState} state */
 export const selectSelectedModel = (state) => {
     const id = state.models.selectedModelId;
-    if (!id) return null;
+    if (id !== 0 && !id) return null;
     return state.models.registry.find((m) => m.id === id) ?? null;
 };
 

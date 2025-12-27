@@ -21,6 +21,7 @@ import * as selectors from '../state/selectors';
  * @property {(chatId: string, title: string) => void} setChatTitle
  * @property {(chatId: string, text: string) => (string|null)} addUserMessage
  * @property {(chatId: string, payload: any) => (string|null)} upsertAssistantMessage
+ * @property {(chatId: string, meta: any) => (string|null)} startAssistantMessage
  *
  * @typedef {Object} AppSelectors
  * @property {(state: AppState) => AppState['ui']} selectUi
@@ -51,23 +52,27 @@ function shallowEqual(a, b) {
 
 export function AppStateProvider({ children, storageKey = 'aibot_app_state_v1' }) {
     const storage = useMemo(() => createLocalStorageAdapter(storageKey), [storageKey]);
+    const stateRef = useRef(null);
+
 
     const loadedOnce = useRef(false);
     /** @type {[AppState, React.Dispatch<React.SetStateAction<AppState>>]} */
     const [state, _setState] = useState(() => {
         const loaded = storage.load();
-        loadedOnce.current = true;
-        return loaded ? mergeWithDefaults(loaded) : initialState;
+        const initial = loaded ? mergeWithDefaults(loaded) : initialState;
+        stateRef.current = initial;
+        return initial;
     });
 
     /** @returns {AppState} */
-    const getState = () => state;
+    const getState = () => stateRef.current;
 
     /** @param {AppState | ((prev: AppState) => AppState)} next */
     const setState = (next) => {
         _setState((prev) => {
             const resolved = typeof next === 'function' ? next(prev) : next;
             if (shallowEqual(prev, resolved)) return prev;
+            stateRef.current = resolved;
             storage.save(resolved);
             return resolved;
         });
@@ -88,6 +93,21 @@ export function AppStateProvider({ children, storageKey = 'aibot_app_state_v1' }
             archiveChat: (chatId, archived) => rawActions.archiveChat(getState(), setState, chatId, archived),
             setChatTitle: (chatId, title) => rawActions.setChatTitle(getState(), setState, chatId, title),
             addUserMessage: (chatId, text) => rawActions.addUserMessage(getState(), setState, chatId, text),
+            addNotification: (chatId, type, message) =>
+                rawActions.addNotification(getState(), setState, chatId, type, message),
+            startAssistantMessage: (chatId, meta) =>
+                rawActions.startAssistantMessage(getState(), setState, chatId, meta),
+            appendAssistantDelta: (chatId, messageId, delta) =>
+                rawActions.appendAssistantDelta(getState(), setState, chatId, messageId, delta),
+            appendAssistantThinkingDelta: (chatId, messageId, delta) =>
+                rawActions.appendAssistantThinkingDelta(getState(), setState, chatId, messageId, delta),
+            finalizeAssistantMessage: (chatId, messageId) =>
+                rawActions.finalizeAssistantMessage(getState(), setState, chatId, messageId),
+            cancelAssistantMessage: (chatId, messageId) =>
+                rawActions.cancelAssistantMessage(getState(), setState, chatId, messageId),
+            errorAssistantMessage: (chatId, messageId) =>
+                rawActions.errorAssistantMessage(getState(), setState, chatId, messageId),
+
             upsertAssistantMessage: (chatId, payload) =>
                 rawActions.upsertAssistantMessage(getState(), setState, chatId, payload),
         };

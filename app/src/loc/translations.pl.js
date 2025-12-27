@@ -24,6 +24,9 @@ export const pl = Object.freeze({
   sideUnarchiveTooltip: 'Przywróć',
   sideChangeChatTitleTooltip: 'Zmień nazwę',
 
+  // InputBar
+  inputMultilineHint: 'Enter aby wysłać, Shift+Enter aby dodać nową linię.',
+
   // Generic
   newChatDefaultTitle: 'Nowy czat',
 });

@@ -30,6 +30,9 @@ export const en = Object.freeze({
   sideUnarchiveTooltip: 'Unarchive',
   sideChangeChatTitleTooltip: 'Rename',
 
+  // InputBar
+  inputMultilineHint: 'Enter to send, Shift+Enter for a new line.',
+
   // Generic
   newChatDefaultTitle: 'New chat',
 });
