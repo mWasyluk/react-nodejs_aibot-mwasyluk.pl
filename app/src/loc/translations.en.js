@@ -49,4 +49,58 @@ export const en = Object.freeze({
 
   // Generic
   newChatDefaultTitle: 'New chat',
+
+  // Dialog - common
+  dialogConfirm: 'Confirm',
+  dialogCancel: 'Cancel',
+  dialogOk: 'OK',
+  dialogClose: 'Close',
+  dialogSave: 'Save',
+
+  // Dialog - rename chat
+  dialogRenameChatTitle: 'Rename chat',
+  dialogRenameChatLabel: 'Chat title',
+  dialogRenameChatPlaceholder: 'Enter new title...',
+  dialogRenameChatValidationEmpty: 'Title cannot be empty',
+  dialogRenameChatValidationTooLong: 'Title is too long (max 100 characters)',
+
+  // Dialog - delete chat
+  dialogDeleteChatTitle: 'Delete chat',
+  dialogDeleteChatMessage: 'Are you sure you want to delete this chat? This action cannot be undone.',
+  dialogDeleteChatConfirm: 'Delete',
+
+  // Dialog - archive chat
+  dialogArchiveChatTitle: 'Archive chat',
+  dialogArchiveChatMessage: 'Are you sure you want to archive this chat?',
+  dialogArchiveChatConfirm: 'Archive',
+
+  // Toast - errors
+  toastErrorTitle: 'Error',
+  toastErrorSaveFailed: 'Failed to save changes',
+  toastErrorStreamInterrupted: 'Stream interrupted',
+  toastErrorStreamAborted: 'Response generation cancelled',
+  toastErrorFetchModels: 'Failed to fetch models',
+  toastErrorModelNotFound: 'Selected model not found',
+  toastErrorNetworkError: 'Network error. Check your connection.',
+  toastErrorUnknown: 'An unexpected error occurred',
+
+  // Toast - success
+  toastSuccessTitle: 'Success',
+  toastSuccessSaved: 'Changes saved successfully',
+  toastSuccessChatRenamed: 'Chat renamed',
+  toastSuccessChatArchived: 'Chat archived',
+  toastSuccessChatDeleted: 'Chat deleted',
+
+  // Toast - warning
+  toastWarningTitle: 'Warning',
+  toastWarningModelMayFail: 'This model may not work correctly',
+
+  // Toast - info
+  toastInfoTitle: 'Info',
+  toastInfoStreamingStarted: 'Generating response...',
+
+  // Message status
+  messageStatusCancelled: 'Response cancelled',
+  messageStatusError: 'An error occurred',
+  messageStatusThinking: 'Thinking...',
 });

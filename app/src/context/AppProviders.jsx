@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { ThemeProvider } from 'styled-components';
+import { ToastProvider, useToast } from '../components/common/Toast';
 import { modelsRegistryService } from '../services/modelsRegistryService';
 import { THEME } from '../state/constants';
 import { darkTheme, lightTheme } from '../theme';
@@ -17,6 +18,7 @@ function ThemeBridge({ children }) {
 
 function ModelsBootstrapper() {
     const { state, actions } = useAppState();
+    const { showError } = useToast();
     const singleRef = useRef(false);
 
     useEffect(() => {
@@ -41,16 +43,19 @@ function ModelsBootstrapper() {
                 // (e.g. previous "error" persisted locally should be corrected).
                 actions.setModelsStatusesById(statusesFromServer, { merge: true });
             } catch (e) {
-                // No chat? Nowhere to put a notification. Just log and let the UI show what it can.
                 console.error('[ModelsBootstrapper] ', e);
+                
+                // Show toast notification for model fetch error
+                showError(
+                    e?.message || 'Failed to fetch models from server',
+                    'Model Registry Error'
+                );
 
                 // If we have *no* models at all, reflect it in statuses (selector can display red).
-                // if (!state.models.registry?.length) {
                 actions.setModelsStatusesById({}, { merge: false });
-                // }
             }
         })();
-    }, [actions, state.models.registry]);
+    }, [actions, state.models.registry, showError]);
 
     return null;
 }
@@ -59,8 +64,10 @@ export default function AppProviders({ children }) {
     return (
         <AppStateProvider>
             <ThemeBridge>
-                <ModelsBootstrapper />
-                {children}
+                <ToastProvider>
+                    <ModelsBootstrapper />
+                    {children}
+                </ToastProvider>
             </ThemeBridge>
         </AppStateProvider>
     );

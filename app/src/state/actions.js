@@ -68,10 +68,9 @@ export function setChatTitle(state, setState, chatId, newTitle) {
     const chat = state.chats.byId[chatId];
     if (!chat) return;
 
-    if (!newTitle || newTitle.length < 3) {
-        alert("New title <3, no no!")
-        return;
-    }
+    // Validation is now handled by UI (AppDialog) - we just do minimal safety check
+    const trimmedTitle = (newTitle || '').trim();
+    if (!trimmedTitle) return;
 
     setState({
         ...state,
@@ -79,7 +78,7 @@ export function setChatTitle(state, setState, chatId, newTitle) {
             ...state.chats,
             byId: {
                 ...state.chats.byId,
-                [chatId]: { ...chat, updatedAt: now(), title: newTitle },
+                [chatId]: { ...chat, updatedAt: now(), title: trimmedTitle },
             },
         },
     });
@@ -107,13 +106,13 @@ export function deleteChat(state, setState, chatId) {
 
     // Remove from byId
     const { [chatId]: _, ...remainingById } = state.chats.byId;
-    
+
     // Remove from allIds
     const remainingAllIds = state.chats.allIds.filter((id) => id !== chatId);
-    
+
     // Remove messages for this chat
     const { [chatId]: __, ...remainingMessages } = state.messages.byChatId;
-    
+
     // If we're deleting the current chat, select another one
     let nextCurrentChatId = state.chats.currentChatId;
     if (nextCurrentChatId === chatId) {

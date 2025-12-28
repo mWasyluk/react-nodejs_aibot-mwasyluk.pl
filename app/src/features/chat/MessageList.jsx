@@ -1,6 +1,9 @@
 import React, { useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import { useAppState } from '../../context/AppStateContext';
+import { useI18n } from '../../hooks/useI18n';
+
+/* ============ STYLED COMPONENTS ============ */
 
 const Wrap = styled.div`
   flex: 1;
@@ -9,7 +12,7 @@ const Wrap = styled.div`
   padding: 14px 14px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 
   &::-webkit-scrollbar {
     width: 10px;
@@ -20,10 +23,19 @@ const Wrap = styled.div`
   }
 `;
 
+const MessageGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+`;
+
 const Row = styled.div`
   display: flex;
-  justify-content: ${({ $role }) => ($role === 'user' ? 'flex-end' : $role === 'assistant' ? 'flex-start' : 'center')};
-  // justify-content: ${({ $role }) => ($role === 'user' ? 'flex-end' : 'flex-start')};
+  justify-content: ${({ $role }) => 
+    $role === 'user' ? 'flex-end' : 
+    $role === 'assistant' ? 'flex-start' : 
+    'center'
+  };
 `;
 
 const Bubble = styled.div`
@@ -35,39 +47,108 @@ const Bubble = styled.div`
   line-height: 1.55;
   font-size: 13px;
 
-  ${({ theme, $role }) => {
+  ${({ theme, $role, $status }) => {
     const isUser = $role === 'user';
-    const isError = $role === 'error';
+    const isError = $role === 'error' || $status === 'error';
+    const isCancelled = $status === 'cancelled';
 
     return css`
       background: ${isUser ? theme.colors.primary + '33' : theme.colors.background + '55'};
       border: 1px solid ${isUser ? theme.colors.primary + '55' : theme.colors.border};
-      background-color: ${isError && theme.colors.error.background};
+      
+      ${isError && css`
+        background: ${theme.colors.error.background};
+        border-color: ${theme.colors.error.default}55;
+      `}
+      
+      ${isCancelled && css`
+        opacity: 0.7;
+        border-style: dashed;
+      `}
     `;
   }}
 `;
 
-const Thinking = styled.div`
+/**
+ * Thinking text - surowy tekst bez tła i wrappera
+ * Wąska czcionka, lekko mniejsza niż treść regularnych wiadomości
+ */
+const ThinkingText = styled.div`
   max-width: 78%;
-  padding: 10px 12px;
-  border-radius: 14px;
-  font-size: 13px;
-  opacity: 0.85;
-  ${({ theme, $role }) => css`
-    background: ${$role === 'user' ? theme.colors.primary + '22' : theme.colors.border + '55'};
+  padding: 4px 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+  font-size: 12px;
+  font-weight: 300;
+  font-style: italic;
+  
+  ${({ theme }) => css`
     color: ${theme.colors.text.secondary};
-    border: 1px dashed ${theme.colors.border};
+    opacity: 0.7;
+  `}
+`;
+
+const ThinkingLabel = styled.span`
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: 6px;
+  
+  ${({ theme }) => css`
+    color: ${theme.colors.text.secondary};
+    opacity: 0.5;
   `}
 `;
 
 const Meta = styled.div`
-  margin-top: 4px;
+  margin-top: 2px;
   font-size: 11px;
   opacity: 0.65;
-  text-align: ${({ $role }) => ($role === 'user' ? 'right' : $role === 'assistant' ? 'left' : 'center')};
+  text-align: ${({ $role }) => 
+    $role === 'user' ? 'right' : 
+    $role === 'assistant' ? 'left' : 
+    'center'
+  };
 `;
 
-function time(ts) {
+const StatusBadge = styled.span`
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  
+  ${({ theme, $status }) => {
+    if ($status === 'cancelled') {
+      return css`
+        background: ${theme.colors.error.background};
+        color: ${theme.colors.error.default};
+      `;
+    }
+    if ($status === 'error') {
+      return css`
+        background: ${theme.colors.error.background};
+        color: ${theme.colors.error.default};
+      `;
+    }
+    if ($status === 'thinking' || $status === 'streaming') {
+      return css`
+        background: ${theme.colors.primary}22;
+        color: ${theme.colors.primary};
+      `;
+    }
+    return '';
+  }}
+`;
+
+const EmptyState = styled.div`
+  font-size: 13px;
+  opacity: 0.75;
+`;
+
+/* ============ HELPERS ============ */
+
+function formatTime(ts) {
   try {
     return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   } catch {
@@ -75,16 +156,37 @@ function time(ts) {
   }
 }
 
+function getStatusLabel(status, t) {
+  switch (status) {
+    case 'cancelled':
+      return t.messageStatusCancelled || 'Cancelled';
+    case 'error':
+      return t.messageStatusError || 'Error';
+    case 'thinking':
+      return t.messageStatusThinking || 'Thinking...';
+    case 'streaming':
+      return '...';
+    default:
+      return null;
+  }
+}
+
+/* ============ COMPONENT ============ */
+
 export default function MessageList({ chatId }) {
   const { state, selectors } = useAppState();
-  const messages = useMemo(() => selectors.selectMessagesForChat(state, chatId), [state, selectors, chatId]);
+  const { t } = useI18n();
+  const messages = useMemo(
+    () => selectors.selectMessagesForChat(state, chatId), 
+    [state, selectors, chatId]
+  );
 
   if (!messages.length) {
     return (
       <Wrap>
-        <div style={{ fontSize: 13, opacity: 0.75 }}>
-          No messages yet. Type something and pretend it’s meaningful.
-        </div>
+        <EmptyState>
+          No messages yet. Type something and pretend it's meaningful.
+        </EmptyState>
       </Wrap>
     );
   }
@@ -97,19 +199,42 @@ export default function MessageList({ chatId }) {
         const finalText = m?.content?.final ?? '';
         const thinkingText = m?.content?.thinking ?? '';
         const showCursor = status === 'streaming';
-        const text = finalText + (showCursor ? '▍' : '');
+        const displayText = finalText + (showCursor ? '▍' : '');
+        const statusLabel = getStatusLabel(status, t);
+
         return (
-          <div key={m.id}>
-            <Row $role={role}>
-              {thinkingText ? (
-                <Thinking $role={role}>{thinkingText}</Thinking>
-              ) : null}
-              <Bubble $role={role}>{text}</Bubble>
-            </Row>
+          <MessageGroup key={m.id}>
+            {/* Thinking text - wyświetlany NAD odpowiedzią, jako osobny blok */}
+            {thinkingText && (
+              <Row $role={role}>
+                <ThinkingText>
+                  <ThinkingLabel>💭</ThinkingLabel>
+                  {thinkingText}
+                </ThinkingText>
+              </Row>
+            )}
+            
+            {/* Main message bubble - wyświetlany POD thinking */}
+            {(displayText || status === 'thinking') && (
+              <Row $role={role}>
+                <Bubble $role={role} $status={status}>
+                  {displayText || (status === 'thinking' ? '...' : '')}
+                </Bubble>
+              </Row>
+            )}
+            
+            {/* Metadata */}
             <Meta $role={role}>
-              {role} · {time(m.createdAt)}
+              {role}
+              {' · '}
+              {formatTime(m.createdAt)}
+              {statusLabel && (
+                <StatusBadge $status={status}>
+                  {statusLabel}
+                </StatusBadge>
+              )}
             </Meta>
-          </div>
+          </MessageGroup>
         );
       })}
     </Wrap>

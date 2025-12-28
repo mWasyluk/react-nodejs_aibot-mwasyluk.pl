@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import {
   Add,
@@ -6,6 +6,7 @@ import {
   ArchiveOutlined,
   UnarchiveOutlined,
   ChatBubbleOutline,
+  Menu,
   MenuOpen,
   Close,
   DeleteOutline,
@@ -15,6 +16,8 @@ import CreateRoundedIcon from '@mui/icons-material/CreateRounded';
 import { IconButton, Tooltip, InputBase } from '@mui/material';
 import { useAppState } from '../../context/AppStateContext';
 import { useI18n } from '../../hooks/useI18n';
+import AppDialog, { useAppDialog } from '../../components/common/AppDialog';
+import { useToast } from '../../components/common/Toast';
 
 /* ============ STYLED COMPONENTS ============ */
 
@@ -373,12 +376,16 @@ function formatDate(ts) {
 export default function SideMenu() {
   const { state, actions, selectors } = useAppState();
   const { t } = useI18n();
+  const { showSuccess } = useToast();
   const chats = useMemo(() => selectors.selectChatsList(state), [state, selectors]);
   const currentChatId = state.chats.currentChatId;
-  const isOpen = !!state.ui.sideMenuOpen;
+  const isOpen = state.ui.sideMenuOpen;
 
   const [mode, setMode] = useState('recent'); // 'recent' | 'archive' | 'search'
   const [query, setQuery] = useState('');
+
+  // Dialog state
+  const { dialogProps, openDialog, closeDialog } = useAppDialog();
 
   const normalizedQuery = query.trim().toLowerCase();
 
@@ -409,21 +416,61 @@ export default function SideMenu() {
 
   const onNewChat = () => actions.createChat({ title: t.newChatDefaultTitle });
 
-  const invokeTitleChange = (chatId) => {
-    const next = window.prompt(t.sideChangeChatTitlePrompt || "New chat title:");
-    if (!next) return;
-    const title = next.trim();
-    if (!title) return;
-    actions.setChatTitle(chatId, title);
-  };
+  // Validation function for chat title
+  const validateChatTitle = useCallback((value) => {
+    const trimmed = value?.trim() || '';
+    if (!trimmed) {
+      return t.dialogRenameChatValidationEmpty || 'Title cannot be empty';
+    }
+    if (trimmed.length > 100) {
+      return t.dialogRenameChatValidationTooLong || 'Title is too long (max 100 characters)';
+    }
+    return null;
+  }, [t]);
 
-  const invokeDeleteChat = (chatId) => {
-    const confirmed = window.confirm(t.sideDeleteChatConfirm || "Are you sure you want to delete this chat?");
-    if (!confirmed) return;
-    actions.deleteChat(chatId);
-  };
+  // Open rename dialog
+  const invokeTitleChange = useCallback((chatId) => {
+    const chat = state.chats.byId[chatId];
+    const currentTitle = chat?.title || '';
 
-  const onToggle = () => actions.setSideMenuOpen(!isOpen);
+    openDialog({
+      title: t.dialogRenameChatTitle || 'Rename chat',
+      type: 'input',
+      inputLabel: t.dialogRenameChatLabel || 'Chat title',
+      inputValue: currentTitle,
+      inputPlaceholder: t.dialogRenameChatPlaceholder || 'Enter new title...',
+      validate: validateChatTitle,
+      confirmText: t.dialogSave || 'Save',
+      cancelText: t.dialogCancel || 'Cancel',
+      onConfirm: (newTitle) => {
+        const trimmedTitle = newTitle.trim();
+        if (trimmedTitle && trimmedTitle !== currentTitle) {
+          actions.setChatTitle(chatId, trimmedTitle);
+          showSuccess(t.toastSuccessChatRenamed || 'Chat renamed');
+        }
+      },
+    });
+  }, [state.chats.byId, openDialog, validateChatTitle, actions, showSuccess, t]);
+
+  // Open delete confirmation dialog
+  const invokeDeleteChat = useCallback((chatId) => {
+    openDialog({
+      title: t.dialogDeleteChatTitle || 'Delete chat',
+      type: 'confirm',
+      message: t.dialogDeleteChatMessage || 'Are you sure you want to delete this chat? This action cannot be undone.',
+      confirmText: t.dialogDeleteChatConfirm || 'Delete',
+      cancelText: t.dialogCancel || 'Cancel',
+      onConfirm: () => {
+        actions.deleteChat(chatId);
+        showSuccess(t.toastSuccessChatDeleted || 'Chat deleted');
+      },
+    });
+  }, [openDialog, actions, showSuccess, t]);
+
+  const onToggle = () => {
+    console.log(isOpen)
+    actions.setSideMenuOpen(!isOpen)
+  };
 
   const onSetMode = (newMode) => {
     if (mode === newMode) {
@@ -443,170 +490,178 @@ export default function SideMenu() {
     return t.sideNoChatsYet;
   };
 
+  const menuIcon = isOpen ? <MenuOpen style={{ width: 20, height: 20 }} /> : <Menu style={{ width: 20, height: 20 }} />;
+
   /* ===== COLLAPSED STATE ===== */
   if (!isOpen) {
     return (
-      <Collapsed>
-        <Tooltip title={t.sideOpenMenuTooltip}>
-          <IconButton onClick={onToggle} size="small">
-            <MenuOpen style={{ width: 20, height: 20 }} />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title={t.sideNewChatTooltip}>
-          <IconButton onClick={onNewChat} size="small">
-            <Add style={{ width: 20, height: 20 }} />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title={t.sideSearchTooltip}>
-          <IconButton onClick={() => { onToggle(); setMode('search'); }} size="small">
-            <Search style={{ width: 20, height: 20 }} />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title={t.sideArchiveTooltip}>
-          <IconButton onClick={() => { onToggle(); setMode('archive'); }} size="small">
-            <ArchiveOutlined style={{ width: 20, height: 20 }} />
-          </IconButton>
-        </Tooltip>
-      </Collapsed>
+      <>
+        <Collapsed>
+          <Tooltip title={t.sideOpenMenuTooltip}>
+            <IconButton onClick={onToggle} size="small">
+              {menuIcon}
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={t.sideNewChatTooltip}>
+            <IconButton onClick={onNewChat} size="small">
+              <Add style={{ width: 20, height: 20 }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={t.sideSearchTooltip}>
+            <IconButton onClick={() => { onToggle(); setMode('search'); }} size="small">
+              <Search style={{ width: 20, height: 20 }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={t.sideArchiveTooltip}>
+            <IconButton onClick={() => { onToggle(); setMode('archive'); }} size="small">
+              <ArchiveOutlined style={{ width: 20, height: 20 }} />
+            </IconButton>
+          </Tooltip>
+        </Collapsed>
+        <AppDialog {...dialogProps} />
+      </>
     );
   }
 
   /* ===== EXPANDED STATE ===== */
   return (
-    <Wrap>
-      {/* Header z toggle */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Tooltip title={t.sideCollapseTooltip}>
-          <IconButton onClick={onToggle} size="small">
-            <MenuOpen style={{ width: 20, height: 20 }} />
-          </IconButton>
-        </Tooltip>
-      </div>
-
-      {/* Przycisk NOWY CHAT */}
-      <NewChatButton onClick={onNewChat}>
-        <Add />
-        {t.sideNewChatButton || 'NOWY CHAT'}
-      </NewChatButton>
-
-      {/* Zakładki: Szukaj / Archiwum */}
-      <TabsRow>
-        <TabButton
-          $active={mode === 'search'}
-          onClick={() => onSetMode('search')}
-        >
-          <Search />
-          {t.sideSearchButton || 'SZUKAJ'}
-        </TabButton>
-        <TabButton
-          $active={mode === 'archive'}
-          onClick={() => onSetMode('archive')}
-        >
-          <ArchiveOutlined />
-          {t.sideArchiveButton || 'ARCHIWUM'}
-        </TabButton>
-      </TabsRow>
-
-      {/* Pole wyszukiwania (tylko w trybie search) */}
-      {mode === 'search' && (
-        <SearchBar>
-          <Search />
-          <SearchInput
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t.sideSearchPlaceholder}
-            inputProps={{ 'aria-label': t.sideSearchPlaceholder }}
-            autoFocus
-          />
-          {query && (
-            <IconButton onClick={() => setQuery('')} size="small">
-              <Close style={{ width: 20, height: 20 }} />
+    <>
+      <Wrap>
+        {/* Header z toggle */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Tooltip title={t.sideCollapseTooltip}>
+            <IconButton onClick={onToggle} size="small">
+              {menuIcon}
             </IconButton>
-          )}
-        </SearchBar>
-      )}
+          </Tooltip>
+        </div>
 
-      {/* Nagłówek sekcji */}
-      <SectionHeader>
-        <SectionTitle>{t.sideChatsTitle}</SectionTitle>
-        <SectionCount>{filteredChats.length}</SectionCount>
-      </SectionHeader>
+        {/* Przycisk NOWY CHAT */}
+        <NewChatButton onClick={onNewChat}>
+          <Add />
+          {t.sideNewChatButton || 'NOWY CHAT'}
+        </NewChatButton>
 
-      {/* Lista czatów */}
-      <List>
-        {filteredChats.length === 0 ? (
-          <div style={{ fontSize: 13, opacity: 0.6, padding: '8px 10px' }}>
-            {getEmptyMessage()}
-          </div>
-        ) : (
-          filteredChats.map((c) => (
-            <ChatItem
-              key={c.id}
-              $active={c.id === currentChatId}
-              onClick={() => actions.setCurrentChat(c.id)}
-              type="button"
-            >
-              <ChatBubbleOutline />
-              <ChatItemText>
-                <ChatItemTitle>{c.title || t.sideUntitledChat}</ChatItemTitle>
-                <ChatItemMeta>
-                  {formatDate(c.updatedAt)}
-                  {mode === 'search' && c.archived ? ` · ${t.sideArchivedLabel}` : ''}
-                </ChatItemMeta>
-              </ChatItemText>
+        {/* Zakładki: Szukaj / Archiwum */}
+        <TabsRow>
+          <TabButton
+            $active={mode === 'search'}
+            onClick={() => onSetMode('search')}
+          >
+            <Search />
+            {t.sideSearchButton || 'SZUKAJ'}
+          </TabButton>
+          <TabButton
+            $active={mode === 'archive'}
+            onClick={() => onSetMode('archive')}
+          >
+            <ArchiveOutlined />
+            {t.sideArchiveButton || 'ARCHIWUM'}
+          </TabButton>
+        </TabsRow>
 
-              <ItemActions onClick={(e) => e.stopPropagation()}>
-                <Tooltip title={t.sideChangeChatTitleTooltip}>
-                  <SmallIconButton
-                    size="small"
-                    onClick={() => invokeTitleChange(c.id)}
-                  >
-                    <CreateRoundedIcon />
-                  </SmallIconButton>
-                </Tooltip>
-
-                <Tooltip title={c.archived ? t.sideUnarchiveTooltip : t.sideArchiveItemTooltip}>
-                  <SmallIconButton
-                    size="small"
-                    onClick={() => actions.archiveChat(c.id, !c.archived)}
-                  >
-                    {c.archived ? <UnarchiveOutlined /> : <ArchiveOutlined />}
-                  </SmallIconButton>
-                </Tooltip>
-
-                <Tooltip title={t.sideDeleteChatTooltip}>
-                  <DeleteButton
-                    size="small"
-                    // color="error"
-                    onClick={() => invokeDeleteChat(c.id)}
-                  >
-                    <DeleteOutline color="error" />
-                    {/* <DeleteOutline color="error" /> */}
-                  </DeleteButton>
-                </Tooltip>
-              </ItemActions>
-            </ChatItem>
-          ))
+        {/* Pole wyszukiwania (tylko w trybie search) */}
+        {mode === 'search' && (
+          <SearchBar>
+            <Search />
+            <SearchInput
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t.sideSearchPlaceholder}
+              inputProps={{ 'aria-label': t.sideSearchPlaceholder }}
+              autoFocus
+            />
+            {query && (
+              <IconButton onClick={() => setQuery('')} size="small">
+                <Close style={{ width: 20, height: 20 }} />
+              </IconButton>
+            )}
+          </SearchBar>
         )}
-      </List>
 
-      {/* Podgląd użytkownika */}
-      <UserCard>
-        <UserAvatar>
-          <Person />
-        </UserAvatar>
-        <UserInfo>
-          <UserName>{t.sideUserAnonymousTitle || 'Anonimowy Użytkownik'}</UserName>
-          <UserHint>{t.sideUserLocalData}</UserHint>
-        </UserInfo>
-      </UserCard>
+        {/* Nagłówek sekcji */}
+        <SectionHeader>
+          <SectionTitle>{t.sideChatsTitle}</SectionTitle>
+          <SectionCount>{filteredChats.length}</SectionCount>
+        </SectionHeader>
 
-      {/* Linki w stopce */}
-      <FooterLinks>
-        <a href="#">{t.sideTermsLink || 'Regulamin'}</a>
-        <span>i</span>
-        <a href="#">{t.sidePrivacyLink || 'polityka prywatności'}</a>
-      </FooterLinks>
-    </Wrap>
+        {/* Lista czatów */}
+        <List>
+          {filteredChats.length === 0 ? (
+            <div style={{ fontSize: 13, opacity: 0.6, padding: '8px 10px' }}>
+              {getEmptyMessage()}
+            </div>
+          ) : (
+            filteredChats.map((c) => (
+              <ChatItem
+                key={c.id}
+                $active={c.id === currentChatId}
+                onClick={() => actions.setCurrentChat(c.id)}
+                type="button"
+              >
+                <ChatBubbleOutline />
+                <ChatItemText>
+                  <ChatItemTitle>{c.title || t.sideUntitledChat}</ChatItemTitle>
+                  <ChatItemMeta>
+                    {formatDate(c.updatedAt)}
+                    {mode === 'search' && c.archived ? ` · ${t.sideArchivedLabel}` : ''}
+                  </ChatItemMeta>
+                </ChatItemText>
+
+                <ItemActions onClick={(e) => e.stopPropagation()}>
+                  <Tooltip title={t.sideChangeChatTitleTooltip}>
+                    <SmallIconButton
+                      size="small"
+                      onClick={() => invokeTitleChange(c.id)}
+                    >
+                      <CreateRoundedIcon />
+                    </SmallIconButton>
+                  </Tooltip>
+
+                  <Tooltip title={c.archived ? t.sideUnarchiveTooltip : t.sideArchiveItemTooltip}>
+                    <SmallIconButton
+                      size="small"
+                      onClick={() => actions.archiveChat(c.id, !c.archived)}
+                    >
+                      {c.archived ? <UnarchiveOutlined /> : <ArchiveOutlined />}
+                    </SmallIconButton>
+                  </Tooltip>
+
+                  <Tooltip title={t.sideDeleteChatTooltip}>
+                    <DeleteButton
+                      size="small"
+                      onClick={() => invokeDeleteChat(c.id)}
+                    >
+                      <DeleteOutline color="error" />
+                    </DeleteButton>
+                  </Tooltip>
+                </ItemActions>
+              </ChatItem>
+            ))
+          )}
+        </List>
+
+        {/* Podgląd użytkownika */}
+        <UserCard>
+          <UserAvatar>
+            <Person />
+          </UserAvatar>
+          <UserInfo>
+            <UserName>{t.sideUserAnonymousTitle || 'Anonimowy Użytkownik'}</UserName>
+            <UserHint>{t.sideUserLocalData}</UserHint>
+          </UserInfo>
+        </UserCard>
+
+        {/* Linki w stopce */}
+        <FooterLinks>
+          <a href="#">{t.sideTermsLink || 'Regulamin'}</a>
+          <span>i</span>
+          <a href="#">{t.sidePrivacyLink || 'polityka prywatności'}</a>
+        </FooterLinks>
+      </Wrap>
+
+      {/* Dialog component */}
+      <AppDialog {...dialogProps} />
+    </>
   );
 }

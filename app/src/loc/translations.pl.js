@@ -43,4 +43,58 @@ export const pl = Object.freeze({
 
   // Generic
   newChatDefaultTitle: 'Nowy czat',
+
+  // Dialog - common
+  dialogConfirm: 'Potwierdź',
+  dialogCancel: 'Anuluj',
+  dialogOk: 'OK',
+  dialogClose: 'Zamknij',
+  dialogSave: 'Zapisz',
+
+  // Dialog - rename chat
+  dialogRenameChatTitle: 'Zmień nazwę czatu',
+  dialogRenameChatLabel: 'Tytuł czatu',
+  dialogRenameChatPlaceholder: 'Wpisz nowy tytuł...',
+  dialogRenameChatValidationEmpty: 'Tytuł nie może być pusty',
+  dialogRenameChatValidationTooLong: 'Tytuł jest za długi (max 100 znaków)',
+
+  // Dialog - delete chat
+  dialogDeleteChatTitle: 'Usuń czat',
+  dialogDeleteChatMessage: 'Czy na pewno chcesz usunąć ten czat? Tej operacji nie można cofnąć.',
+  dialogDeleteChatConfirm: 'Usuń',
+
+  // Dialog - archive chat
+  dialogArchiveChatTitle: 'Archiwizuj czat',
+  dialogArchiveChatMessage: 'Czy na pewno chcesz zarchiwizować ten czat?',
+  dialogArchiveChatConfirm: 'Archiwizuj',
+
+  // Toast - errors
+  toastErrorTitle: 'Błąd',
+  toastErrorSaveFailed: 'Nie udało się zapisać zmian',
+  toastErrorStreamInterrupted: 'Stream przerwany',
+  toastErrorStreamAborted: 'Generowanie odpowiedzi anulowane',
+  toastErrorFetchModels: 'Błąd pobierania modeli',
+  toastErrorModelNotFound: 'Wybrany model nie został odnaleziony',
+  toastErrorNetworkError: 'Błąd sieci. Sprawdź połączenie.',
+  toastErrorUnknown: 'Wystąpił nieoczekiwany błąd',
+
+  // Toast - success
+  toastSuccessTitle: 'Sukces',
+  toastSuccessSaved: 'Zmiany zapisane pomyślnie',
+  toastSuccessChatRenamed: 'Nazwa czatu zmieniona',
+  toastSuccessChatArchived: 'Czat zarchiwizowany',
+  toastSuccessChatDeleted: 'Czat usunięty',
+
+  // Toast - warning
+  toastWarningTitle: 'Ostrzeżenie',
+  toastWarningModelMayFail: 'Ten model może nie działać poprawnie',
+
+  // Toast - info
+  toastInfoTitle: 'Informacja',
+  toastInfoStreamingStarted: 'Generowanie odpowiedzi...',
+
+  // Message status
+  messageStatusCancelled: 'Odpowiedź anulowana',
+  messageStatusError: 'Wystąpił błąd',
+  messageStatusThinking: 'Myślę...',
 });

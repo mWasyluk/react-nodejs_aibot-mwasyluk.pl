@@ -4,8 +4,8 @@ import { useCallback, useRef, useState } from 'react';
 import styled, { css } from 'styled-components';
 import { useAppState } from '../../context/AppStateContext';
 import { useI18n } from '../../hooks/useI18n';
+import { useToast } from '../../components/common/Toast';
 import { llmService } from '../../services/LLMService';
-import { NOTIFICATIONS } from '../../state/constants';
 import { isValidModelId } from '../../utils/model-util';
 
 const Wrap = styled.div`
@@ -55,6 +55,7 @@ const CustomIconButton = styled(IconButton)`
 export default function InputBar({ chatId }) {
   const { state, actions, selectors } = useAppState();
   const { t } = useI18n();
+  const { showError, showWarning } = useToast();
   const [text, setText] = useState('');
 
   const abortRef = useRef(null);
@@ -69,11 +70,14 @@ export default function InputBar({ chatId }) {
 
     const model = selectors.selectSelectedModel(state);
     if (!isValidModelId(model?.id)) {
-      actions.addNotification(chatId, NOTIFICATIONS.ERROR, 'No model selected.');
+      showError(
+        t.toastErrorModelNotFound || 'No model selected. Please select a model first.',
+        t.toastErrorTitle || 'Error'
+      );
       return;
     }
 
-    // build prompt messages using current state + the message we’re about to add
+    // build prompt messages using current state + the message we're about to add
     const currentMsgs = selectors.selectMessagesForChat(state, chatId);
     const promptMsgs = [...currentMsgs, { role: 'user', content: { final: value } }];
 
@@ -113,18 +117,28 @@ export default function InputBar({ chatId }) {
         }
 
         if (ev.type === 'abort') {
+          // Mark message as cancelled and show toast
           actions.cancelAssistantMessage(chatId, assistantId);
+          showWarning(
+            t.toastErrorStreamAborted || 'Response generation was cancelled',
+            t.toastWarningTitle || 'Cancelled'
+          );
           return;
         }
 
         if (ev.type === 'error') {
-          actions.addNotification(chatId, NOTIFICATIONS.ERROR, ev.message || 'Streaming error');
+          // Show error toast
+          showError(
+            ev.message || t.toastErrorStreamInterrupted || 'Streaming error occurred',
+            t.toastErrorTitle || 'Error'
+          );
           actions.setModelStatus(model.id, 'error');
+          // Mark message as cancelled (not error state - simpler UX per requirements)
           actions.cancelAssistantMessage(chatId, assistantId);
         }
       },
     });
-  }, [actions, chatId, selectors, state, text]);
+  }, [actions, chatId, selectors, state, text, showError, showWarning, t]);
 
   const onKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -142,7 +156,6 @@ export default function InputBar({ chatId }) {
           onKeyDown={onKeyDown}
           placeholder="Write a message…"
         />
-        {/* <Hint>Enter to send, Shift+Enter for a new line.</Hint> */}
         <Hint>{t.inputMultilineHint}</Hint>
       </div>
 
