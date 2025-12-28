@@ -101,6 +101,43 @@ export function archiveChat(state, setState, chatId, archived = true) {
     });
 }
 
+export function deleteChat(state, setState, chatId) {
+    const chat = state.chats.byId[chatId];
+    if (!chat) return;
+
+    // Remove from byId
+    const { [chatId]: _, ...remainingById } = state.chats.byId;
+    
+    // Remove from allIds
+    const remainingAllIds = state.chats.allIds.filter((id) => id !== chatId);
+    
+    // Remove messages for this chat
+    const { [chatId]: __, ...remainingMessages } = state.messages.byChatId;
+    
+    // If we're deleting the current chat, select another one
+    let nextCurrentChatId = state.chats.currentChatId;
+    if (nextCurrentChatId === chatId) {
+        // Find the first non-archived chat, or null if none
+        const nonArchivedIds = remainingAllIds.filter(
+            (id) => remainingById[id] && !remainingById[id].archived
+        );
+        nextCurrentChatId = nonArchivedIds[0] ?? remainingAllIds[0] ?? null;
+    }
+
+    setState({
+        ...state,
+        chats: {
+            byId: remainingById,
+            allIds: remainingAllIds,
+            currentChatId: nextCurrentChatId,
+        },
+        messages: {
+            ...state.messages,
+            byChatId: remainingMessages,
+        },
+    });
+}
+
 export function addUserMessage(state, setState, chatId, text) {
     if (!chatId || !text?.trim()) return null;
 

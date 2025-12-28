@@ -1,10 +1,22 @@
 import React, { useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
-import { Add, Search, ArchiveOutlined, UnarchiveOutlined, ChatBubbleOutline, MenuOpen, Close } from '@mui/icons-material';
+import {
+  Add,
+  Search,
+  ArchiveOutlined,
+  UnarchiveOutlined,
+  ChatBubbleOutline,
+  MenuOpen,
+  Close,
+  DeleteOutline,
+  Person
+} from '@mui/icons-material';
 import CreateRoundedIcon from '@mui/icons-material/CreateRounded';
 import { IconButton, Tooltip, InputBase } from '@mui/material';
 import { useAppState } from '../../context/AppStateContext';
 import { useI18n } from '../../hooks/useI18n';
+
+/* ============ STYLED COMPONENTS ============ */
 
 const Wrap = styled.aside`
   width: 320px;
@@ -13,13 +25,13 @@ const Wrap = styled.aside`
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding: 16px;
+  border-radius: 40px;
 
   ${({ theme }) => css`
     background: ${theme.colors.surface}cc;
     border: 1px solid ${theme.colors.border};
-    border-radius: 18px;
     backdrop-filter: blur(6px);
-    padding: 12px;
   `}
 `;
 
@@ -32,46 +44,127 @@ const Collapsed = styled.aside`
   align-items: center;
   justify-content: flex-start;
   gap: 8px;
+  padding: 12px 6px;
+  border-radius: 40px;
 
   ${({ theme }) => css`
     background: ${theme.colors.surface}cc;
     border: 1px solid ${theme.colors.border};
-    border-radius: 18px;
     backdrop-filter: blur(6px);
-    padding: 10px 6px;
   `}
 `;
 
-const TopActions = styled.div`
+/* Przycisk NOWY CHAT - full width, 48px height, 20px border-radius */
+const NewChatButton = styled.button`
+  width: 100%;
+  height: 48px;
+  padding: 0 20px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+
+  ${({ theme }) => css`
+    background: ${theme.colors.surface};
+    color: ${theme.colors.primary};
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.5);
+      border-color: ${theme.colors.primary}40;
+    }
+  `}
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+`;
+
+/* Kontener na przyciski Szukaj / Archiwum */
+const TabsRow = styled.div`
   display: flex;
   gap: 8px;
   align-items: center;
 `;
 
-const Title = styled.div`
-  font-size: 14px;
-  font-weight: 700;
-  opacity: 0.9;
+/* Przycisk zakładki (Szukaj / Archiwum) - hug content, 36px height */
+const TabButton = styled.button`
+  height: 36px;
+  padding: 0 20px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+
+  ${({ theme, $active }) => css`
+    background: ${$active ? theme.colors.primary + '1A' : 'transparent'};
+    border-color: ${$active ? theme.colors.primary + '1A' : 'transparent'};
+    color: ${$active ? theme.colors.primary : theme.colors.text.primary};
+
+    &:hover {
+      background: ${$active ? theme.colors.primary + '1A' : 'rgba(255, 255, 255, 0.5)'};
+      border-color: ${$active ? theme.colors.primary + '1A' : theme.colors.primary + '40'};
+    }
+  `}
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+`;
+
+/* Tytuł sekcji "Czaty" */
+const SectionHeader = styled.div`
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0 10px;
+`;
+
+const SectionTitle = styled.div`
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.7;
   user-select: none;
 `;
 
-
-const ModeHint = styled.div`
+const SectionCount = styled.div`
   font-size: 12px;
-  opacity: 0.75;
+  opacity: 0.5;
 `;
 
+/* Pole wyszukiwania - 48px height */
 const SearchBar = styled.div`
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 10px;
-  border-radius: 12px;
+  gap: 8px;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: 20px;
 
   ${({ theme }) => css`
     background: ${theme.colors.surface};
     border: 1px solid ${theme.colors.border};
   `}
+
+  svg {
+    width: 20px;
+    height: 20px;
+    opacity: 0.6;
+  }
 `;
 
 const SearchInput = styled(InputBase)`
@@ -79,99 +172,193 @@ const SearchInput = styled(InputBase)`
   font-size: 13px;
 `;
 
-const ItemRight = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  opacity: 0.8;
-  align-self: end;
-  justify-self: end;
-`;
+/* Lista czatów */
 const List = styled.div`
   flex: 1;
   overflow: auto;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding-right: 4px;
+  gap: 4px;
 
-  /* Scrollbar, bo czemu nie */
   &::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
   }
   &::-webkit-scrollbar-thumb {
-    border-radius: 8px;
-    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.15);
   }
 `;
 
-const Item = styled.button`
+/* Akcje przy czacie (edycja, archiwizacja, usuwanie) - widoczne na hover */
+const ItemActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  margin-left: auto;
+  flex-shrink: 0;
+`;
+
+/* Pojedynczy czat - full width, 10px padding X, 5px padding Y, 10px border-radius */
+const ChatItem = styled.button`
   width: 100%;
-  border: 0;
+  border: 1px solid transparent;
   text-align: left;
   cursor: pointer;
-  padding: 10px 10px;
-  border-radius: 12px;
+  padding: 5px 10px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   gap: 10px;
+  transition: all 0.15s ease;
 
   ${({ theme, $active }) => css`
-    background: ${$active ? theme.colors.primary + '33' : 'transparent'};
-    outline: 1px solid ${$active ? theme.colors.primary + '55' : 'transparent'};
+    background: ${$active ? theme.colors.primary + '1A' : 'transparent'};
+    border-color: ${$active ? theme.colors.primary + '1A' : 'transparent'};
 
     &:hover {
-      background: ${$active ? theme.colors.primary + '40' : theme.colors.surface};
-      outline-color: ${$active ? theme.colors.primary + '66' : theme.colors.border};
+      background: ${$active ? theme.colors.primary + '1A' : 'rgba(255, 255, 255, 0.5)'};
+      border-color: ${$active ? theme.colors.primary + '1A' : theme.colors.primary + '40'};
+    }
+
+    &:hover ${ItemActions} {
+      opacity: 1;
     }
   `}
+
+  > svg {
+    width: 20px;
+    height: 20px;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
 `;
 
-const ItemText = styled.div`
+const ChatItemText = styled.div`
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
-  width: 100%;
+  flex: 1;
 `;
 
-const ItemTitle = styled.div`
+const ChatItemTitle = styled.div`
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 `;
 
-const ItemMeta = styled.div`
-  font-size: 12px;
-  opacity: 0.7;
+const ChatItemMeta = styled.div`
+  font-size: 11px;
+  opacity: 0.6;
 `;
 
-const Footer = styled.div`
+/* Przycisk usunięcia - czerwony domyślnie */
+const DeleteButton = styled(IconButton)`
+  && {
+    padding: 4px;
+    
+    
+    &:hover {
+      background: ${({ theme }) => theme.colors.error.background};
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    svg * {
+      fill: ${({ theme }) => theme.colors.error.default};
+    }
+  }
+`;
+
+/* Małe IconButtony przy czatach */
+const SmallIconButton = styled(IconButton)`
+  && {
+    padding: 4px;
+    
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+`;
+
+const UserCard = styled.div`
+  width: 100%;
+  height: 64px;
+  padding: 0 16px 0 0;
+  border-radius: 999px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding-top: 6px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 12px;
+
+  ${({ theme }) => css`
+    background: ${theme.colors.surface};
+    border: 1px solid ${theme.colors.border};
+  `}
 `;
 
-const UserBadge = styled.div`
+const UserAvatar = styled.div`
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ${({ theme }) => css`
+    background: ${theme.colors.primary}22;
+    color: ${theme.colors.primary};
+  `}
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+`;
+
+const UserInfo = styled.div`
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex: 1;
+  min-width: 0;
 `;
 
 const UserName = styled.div`
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  opacity: 0.9;
 `;
 
 const UserHint = styled.div`
   font-size: 11px;
-  opacity: 0.65;
+  opacity: 0.6;
 `;
+
+const FooterLinks = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  font-size: 11px;
+  opacity: 0.5;
+  
+  a {
+    color: inherit;
+    text-decoration: underline;
+    
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+`;
+
+/* ============ HELPER FUNCTIONS ============ */
 
 function formatDate(ts) {
   try {
@@ -181,6 +368,8 @@ function formatDate(ts) {
   }
 }
 
+/* ============ COMPONENT ============ */
+
 export default function SideMenu() {
   const { state, actions, selectors } = useAppState();
   const { t } = useI18n();
@@ -188,18 +377,20 @@ export default function SideMenu() {
   const currentChatId = state.chats.currentChatId;
   const isOpen = !!state.ui.sideMenuOpen;
 
-  const [mode, setMode] = useState('recent'); // 'recent' | 'archived' | 'search'
+  const [mode, setMode] = useState('recent'); // 'recent' | 'archive' | 'search'
   const [query, setQuery] = useState('');
 
   const normalizedQuery = query.trim().toLowerCase();
 
   const filteredChats = useMemo(() => {
-    const base =
-      mode === 'archived'
-        ? chats.filter((c) => c.archived)
-        : mode === 'search'
-          ? chats
-          : chats.filter((c) => !c.archived);
+    let base;
+    if (mode === 'archive') {
+      base = chats.filter((c) => c.archived);
+    } else if (mode === 'search') {
+      base = chats; // wszystkie (recent + archived)
+    } else {
+      base = chats.filter((c) => !c.archived);
+    }
 
     if (mode !== 'search' || !normalizedQuery) return base;
 
@@ -207,7 +398,6 @@ export default function SideMenu() {
       const title = String(c.title ?? '').toLowerCase();
       if (title.includes(normalizedQuery)) return true;
 
-      // potem: filtr po treści messages (na start: dość prosto, ale działa)
       const msgs = state.messages.byChatId[c.id] ?? [];
       return msgs.some((m) => {
         const finalText = String(m?.content?.final ?? '').toLowerCase();
@@ -218,150 +408,205 @@ export default function SideMenu() {
   }, [chats, mode, normalizedQuery, state.messages.byChatId]);
 
   const onNewChat = () => actions.createChat({ title: t.newChatDefaultTitle });
+
   const invokeTitleChange = (chatId) => {
-    const next = window.prompt("New chat title:");
+    const next = window.prompt(t.sideChangeChatTitlePrompt || "New chat title:");
     if (!next) return;
     const title = next.trim();
     if (!title) return;
     actions.setChatTitle(chatId, title);
   };
+
+  const invokeDeleteChat = (chatId) => {
+    const confirmed = window.confirm(t.sideDeleteChatConfirm || "Are you sure you want to delete this chat?");
+    if (!confirmed) return;
+    actions.deleteChat(chatId);
+  };
+
   const onToggle = () => actions.setSideMenuOpen(!isOpen);
 
-  const onToggleSearch = () => {
-    setQuery('');
-    setMode((m) => (m === 'search' ? 'recent' : 'search'));
+  const onSetMode = (newMode) => {
+    if (mode === newMode) {
+      setMode('recent');
+      setQuery('');
+    } else {
+      setMode(newMode);
+      if (newMode !== 'search') {
+        setQuery('');
+      }
+    }
   };
 
-  const onToggleArchive = () => {
-    setQuery('');
-    setMode((m) => (m === 'archived' ? 'recent' : 'archived'));
+  const getEmptyMessage = () => {
+    if (mode === 'archive') return t.sideNoArchivedChats || 'No archived chats.';
+    if (mode === 'search' && normalizedQuery) return t.sideNoSearchResults || 'No results found.';
+    return t.sideNoChatsYet;
   };
 
+  /* ===== COLLAPSED STATE ===== */
   if (!isOpen) {
     return (
       <Collapsed>
         <Tooltip title={t.sideOpenMenuTooltip}>
           <IconButton onClick={onToggle} size="small">
-            <MenuOpen fontSize="small" />
+            <MenuOpen style={{ width: 20, height: 20 }} />
           </IconButton>
         </Tooltip>
         <Tooltip title={t.sideNewChatTooltip}>
           <IconButton onClick={onNewChat} size="small">
-            <Add fontSize="small" />
+            <Add style={{ width: 20, height: 20 }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title={t.sideSearchTooltip}>
+          <IconButton onClick={() => { onToggle(); setMode('search'); }} size="small">
+            <Search style={{ width: 20, height: 20 }} />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title={t.sideArchiveTooltip}>
+          <IconButton onClick={() => { onToggle(); setMode('archive'); }} size="small">
+            <ArchiveOutlined style={{ width: 20, height: 20 }} />
           </IconButton>
         </Tooltip>
       </Collapsed>
     );
   }
 
+  /* ===== EXPANDED STATE ===== */
   return (
     <Wrap>
-      <TopActions>
-        <Tooltip title={t.sideNewChatTooltip}>
-          <IconButton onClick={onNewChat} size="small">
-            <Add fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title={mode === 'search' ? t.sideSearchCloseTooltip : t.sideSearchTooltip}>
-          <IconButton onClick={onToggleSearch} size="small">
-            {mode === 'search' ? <Close fontSize="small" /> : <Search fontSize="small" />}
-          </IconButton>
-        </Tooltip>
-        <Tooltip title={mode === 'archived' ? t.sideArchiveCloseTooltip : t.sideArchiveTooltip}>
-          <IconButton onClick={onToggleArchive} size="small">
-            <ArchiveOutlined fontSize="small" style={{ opacity: mode === 'archived' ? 1 : 0.85 }} />
-          </IconButton>
-        </Tooltip>
-        <div style={{ flex: 1 }} />
+      {/* Header z toggle */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <Tooltip title={t.sideCollapseTooltip}>
           <IconButton onClick={onToggle} size="small">
-            <MenuOpen fontSize="small" />
+            <MenuOpen style={{ width: 20, height: 20 }} />
           </IconButton>
         </Tooltip>
-      </TopActions>
-
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-        <Title>{t.sideChatsTitle}</Title>
-        <div style={{ fontSize: 12, opacity: 0.65 }}>{filteredChats.length}</div>
       </div>
 
+      {/* Przycisk NOWY CHAT */}
+      <NewChatButton onClick={onNewChat}>
+        <Add />
+        {t.sideNewChatButton || 'NOWY CHAT'}
+      </NewChatButton>
 
+      {/* Zakładki: Szukaj / Archiwum */}
+      <TabsRow>
+        <TabButton
+          $active={mode === 'search'}
+          onClick={() => onSetMode('search')}
+        >
+          <Search />
+          {t.sideSearchButton || 'SZUKAJ'}
+        </TabButton>
+        <TabButton
+          $active={mode === 'archive'}
+          onClick={() => onSetMode('archive')}
+        >
+          <ArchiveOutlined />
+          {t.sideArchiveButton || 'ARCHIWUM'}
+        </TabButton>
+      </TabsRow>
+
+      {/* Pole wyszukiwania (tylko w trybie search) */}
       {mode === 'search' && (
         <SearchBar>
-          <Search fontSize="small" style={{ opacity: 0.8 }} />
+          <Search />
           <SearchInput
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t.sideSearchPlaceholder}
             inputProps={{ 'aria-label': t.sideSearchPlaceholder }}
+            autoFocus
           />
-          {query ? (
+          {query && (
             <IconButton onClick={() => setQuery('')} size="small">
-              <Close fontSize="small" />
+              <Close style={{ width: 20, height: 20 }} />
             </IconButton>
-          ) : null}
+          )}
         </SearchBar>
       )}
 
-      {mode === 'archived' && (
-        <ModeHint>{t.sideArchiveHint}</ModeHint>
-      )}
+      {/* Nagłówek sekcji */}
+      <SectionHeader>
+        <SectionTitle>{t.sideChatsTitle}</SectionTitle>
+        <SectionCount>{filteredChats.length}</SectionCount>
+      </SectionHeader>
+
+      {/* Lista czatów */}
       <List>
-        {chats.length === 0 ? (
-          <div style={{ fontSize: 13, opacity: 0.7, padding: '6px 4px' }}>
-            {t.sideNoChatsYet}
+        {filteredChats.length === 0 ? (
+          <div style={{ fontSize: 13, opacity: 0.6, padding: '8px 10px' }}>
+            {getEmptyMessage()}
           </div>
         ) : (
           filteredChats.map((c) => (
-            <Item
+            <ChatItem
               key={c.id}
               $active={c.id === currentChatId}
               onClick={() => actions.setCurrentChat(c.id)}
               type="button"
             >
-              <ChatBubbleOutline fontSize="small" style={{ opacity: 0.85 }} />
-              <ItemText>
-                <ItemTitle>{c.title || t.sideUntitledChat}</ItemTitle>
-                <ItemMeta>
+              <ChatBubbleOutline />
+              <ChatItemText>
+                <ChatItemTitle>{c.title || t.sideUntitledChat}</ChatItemTitle>
+                <ChatItemMeta>
                   {formatDate(c.updatedAt)}
                   {mode === 'search' && c.archived ? ` · ${t.sideArchivedLabel}` : ''}
-                </ItemMeta>
-              </ItemText>
+                </ChatItemMeta>
+              </ChatItemText>
 
-              <ItemRight onClick={(e) => e.stopPropagation()}>
-                <Tooltip title={c.archived ? t.sideUnarchiveTooltip : t.sideArchiveItemTooltip}>
-                  <IconButton
-                    size="small"
-                    onClick={() => actions.archiveChat(c.id, !c.archived)}
-                  >
-                    {c.archived ? <UnarchiveOutlined fontSize="small" /> : <ArchiveOutlined fontSize="small" />}
-                  </IconButton>
-                </Tooltip>
-              </ItemRight>
-
-              <ItemRight onClick={(e) => e.stopPropagation()}>
+              <ItemActions onClick={(e) => e.stopPropagation()}>
                 <Tooltip title={t.sideChangeChatTitleTooltip}>
-                  <IconButton
+                  <SmallIconButton
                     size="small"
                     onClick={() => invokeTitleChange(c.id)}
                   >
-                    <CreateRoundedIcon fontSize="small" />
-                  </IconButton>
+                    <CreateRoundedIcon />
+                  </SmallIconButton>
                 </Tooltip>
-              </ItemRight>
-            </Item>
-          )))}
+
+                <Tooltip title={c.archived ? t.sideUnarchiveTooltip : t.sideArchiveItemTooltip}>
+                  <SmallIconButton
+                    size="small"
+                    onClick={() => actions.archiveChat(c.id, !c.archived)}
+                  >
+                    {c.archived ? <UnarchiveOutlined /> : <ArchiveOutlined />}
+                  </SmallIconButton>
+                </Tooltip>
+
+                <Tooltip title={t.sideDeleteChatTooltip}>
+                  <DeleteButton
+                    size="small"
+                    // color="error"
+                    onClick={() => invokeDeleteChat(c.id)}
+                  >
+                    <DeleteOutline color="error" />
+                    {/* <DeleteOutline color="error" /> */}
+                  </DeleteButton>
+                </Tooltip>
+              </ItemActions>
+            </ChatItem>
+          ))
+        )}
       </List>
 
-      <Footer>
-        <UserBadge>
-          <UserName>{t.sideUserAnonymous}</UserName>
+      {/* Podgląd użytkownika */}
+      <UserCard>
+        <UserAvatar>
+          <Person />
+        </UserAvatar>
+        <UserInfo>
+          <UserName>{t.sideUserAnonymousTitle || 'Anonimowy Użytkownik'}</UserName>
           <UserHint>{t.sideUserLocalData}</UserHint>
-        </UserBadge>
+        </UserInfo>
+      </UserCard>
 
-        {/* Placeholder for future user/actions */}
-        <div style={{ width: 8 }} />
-      </Footer>
+      {/* Linki w stopce */}
+      <FooterLinks>
+        <a href="#">{t.sideTermsLink || 'Regulamin'}</a>
+        <span>i</span>
+        <a href="#">{t.sidePrivacyLink || 'polityka prywatności'}</a>
+      </FooterLinks>
     </Wrap>
   );
 }

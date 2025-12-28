@@ -20,6 +20,7 @@ import { createLocalStorageAdapter } from '../state/storage';
  * @property {(opts?: {title?: string}) => string} createChat
  * @property {(id: string) => void} setCurrentChat
  * @property {(chatId: string, archived?: boolean) => void} archiveChat
+ * @property {(chatId: string) => void} deleteChat
  * @property {(chatId: string, title: string) => void} setChatTitle
  * @property {(chatId: string, text: string) => (string|null)} addUserMessage
  * @property {(chatId: string, payload: any) => (string|null)} upsertAssistantMessage
@@ -95,6 +96,7 @@ export function AppStateProvider({ children, storageKey = 'aibot_app_state_v1' }
             createChat: (opts) => rawActions.createChat(getState(), setState, opts),
             setCurrentChat: (id) => rawActions.setCurrentChat(getState(), setState, id),
             archiveChat: (chatId, archived) => rawActions.archiveChat(getState(), setState, chatId, archived),
+            deleteChat: (chatId) => rawActions.deleteChat(getState(), setState, chatId),
             setChatTitle: (chatId, title) => rawActions.setChatTitle(getState(), setState, chatId, title),
             addUserMessage: (chatId, text) => rawActions.addUserMessage(getState(), setState, chatId, text),
             addNotification: (chatId, type, message) =>
