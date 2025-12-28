@@ -1,3 +1,5 @@
+import { isValidModelId } from '../utils/model-util';
+
 /** @param {import('./types').AppState} state */
 export const selectUi = (state) => state.ui;
 
@@ -36,12 +38,12 @@ export const selectModelsRegistry = (state) => state.models.registry;
 /** @param {import('./types').AppState} state */
 export const selectSelectedModel = (state) => {
     const id = state.models.selectedModelId;
-    if (id !== 0 && !id) return null;
-    return state.models.registry.find((m) => m.id === id) ?? null;
+    if (!isValidModelId(id)) return null;
+    return state.models.registry.find((m) => parseInt(m.id) === parseInt(id)) ?? null;
 };
 
 /** @param {import('./types').AppState} state */
 export const selectModelStatus = (state, modelId) => {
-    if (!modelId) return 'missing';
+    if (!isValidModelId(modelId)) return 'missing';
     return state.models.statusesById[modelId] ?? 'missing';
 };

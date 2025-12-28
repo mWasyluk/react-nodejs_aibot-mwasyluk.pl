@@ -36,7 +36,7 @@
  * @property {Object.<string, Message[]>} byChatId
  *
  * @typedef {Object} ModelsState
- * @property {Array<{id: string, label: string, provider?: string, runtimeId?: string}>} registry
+ * @property {Array<{id: string|number, title: string, modelName?: string, provider?: string, runtimeId?: string}>} registry
  * @property {string|null} selectedModelId
  * @property {Object.<string, ModelStatus>} statusesById
  *

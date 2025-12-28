@@ -1,4 +1,5 @@
 import { STREAM_URL } from '../utils/api-util';
+import { isValidModelId } from '../utils/model-util';
 
 /**
  * @typedef {Object} LlmStreamEvent
@@ -25,7 +26,7 @@ export class LLMService {
      */
     async streamChat({ chatId, model, messages, onEvent, signal }) {
         if (!chatId) throw new Error('chatId required');
-        if (model?.id !== 0 && !model?.id) throw new Error('model required');
+        if (!isValidModelId(model?.id)) throw new Error('model required');
 
         const prompt = this.buildPrompt(messages);
 

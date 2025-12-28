@@ -5,3 +5,4 @@ deploy/logs
 deploy/server
 
 desktop.ini
+.vscode

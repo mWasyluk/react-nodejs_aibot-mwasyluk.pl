@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useMemo, useRef, useState } from 'react';
-import { initialState } from '../state/initialState';
-import { createLocalStorageAdapter } from '../state/storage';
 import * as rawActions from '../state/actions';
+import { initialState } from '../state/initialState';
 import * as selectors from '../state/selectors';
+import { createLocalStorageAdapter } from '../state/storage';
 
 /**
  * @typedef {import('../state/types').AppState} AppState
@@ -14,6 +14,8 @@ import * as selectors from '../state/selectors';
  *
  * @property {(registry: AppState['models']['registry']) => void} setModelsRegistry
  * @property {(id: string|null) => void} setSelectedModelId
+ * @property {(modelId: string|number, status: import('../state/types').ModelStatus) => void} setModelStatus
+ * @property {(statusesById: Object.<string, import('../state/types').ModelStatus>, opts?: {merge?: boolean}) => void} setModelsStatusesById
  *
  * @property {(opts?: {title?: string}) => string} createChat
  * @property {(id: string) => void} setCurrentChat
@@ -87,6 +89,8 @@ export function AppStateProvider({ children, storageKey = 'aibot_app_state_v1' }
 
             setModelsRegistry: (registry) => rawActions.setModelsRegistry(getState(), setState, registry),
             setSelectedModelId: (id) => rawActions.setSelectedModelId(getState(), setState, id),
+            setModelStatus: (modelId, status) => rawActions.setModelStatus(getState(), setState, modelId, status),
+            setModelsStatusesById: (statusesById, opts) => rawActions.setModelsStatusesById(getState(), setState, statusesById, opts),
 
             createChat: (opts) => rawActions.createChat(getState(), setState, opts),
             setCurrentChat: (id) => rawActions.setCurrentChat(getState(), setState, id),

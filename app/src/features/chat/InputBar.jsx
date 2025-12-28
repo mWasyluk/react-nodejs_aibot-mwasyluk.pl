@@ -1,11 +1,12 @@
-import React, { useCallback, useState, useRef } from 'react';
-import styled, { css } from 'styled-components';
 import { Send } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
+import { useCallback, useRef, useState } from 'react';
+import styled, { css } from 'styled-components';
 import { useAppState } from '../../context/AppStateContext';
+import { useI18n } from '../../hooks/useI18n';
 import { llmService } from '../../services/LLMService';
 import { NOTIFICATIONS } from '../../state/constants';
-import { useI18n } from '../../hooks/useI18n';
+import { isValidModelId } from '../../utils/model-util';
 
 const Wrap = styled.div`
   padding: 12px 14px 14px;
@@ -67,7 +68,7 @@ export default function InputBar({ chatId }) {
     abortRef.current = new AbortController();
 
     const model = selectors.selectSelectedModel(state);
-    if (model?.id !== 0 && !model?.id) {
+    if (!isValidModelId(model?.id)) {
       actions.addNotification(chatId, NOTIFICATIONS.ERROR, 'No model selected.');
       return;
     }
@@ -107,6 +108,7 @@ export default function InputBar({ chatId }) {
 
         if (ev.type === 'done') {
           actions.finalizeAssistantMessage(chatId, assistantId);
+          actions.setModelStatus(model.id, 'ok');
           return;
         }
 
@@ -117,6 +119,7 @@ export default function InputBar({ chatId }) {
 
         if (ev.type === 'error') {
           actions.addNotification(chatId, NOTIFICATIONS.ERROR, ev.message || 'Streaming error');
+          actions.setModelStatus(model.id, 'error');
           actions.cancelAssistantMessage(chatId, assistantId);
         }
       },

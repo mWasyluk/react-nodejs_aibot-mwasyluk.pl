@@ -287,21 +287,31 @@ export function errorAssistantMessage(state, setState, chatId, messageId) {
 
 
 export function setModelsRegistry(state, setState, registry) {
-    // registry: [{id,label,provider,runtimeId}, ...]
+    // registry: [{id,title,modelName,provider,runtimeId}, ...]
+    const nextRegistry = Array.isArray(registry) ? registry : [];
+
+    // Keep previously selected model if it still exists after refresh.
+    const prevSelected = state.models.selectedModelId;
+    const hasPrev =
+        (prevSelected === 0 || !!prevSelected) &&
+        nextRegistry.some((m) => m.id === prevSelected);
+
+    const selectedModelId = hasPrev ? prevSelected : nextRegistry?.[0]?.id ?? null;
+
+    // Ensure we have statuses for all models in registry.
     const statusesById = { ...state.models.statusesById };
-    for (const m of registry) {
-        if (!statusesById[m.id]) statusesById[m.id] = 'ok';
+    for (const m of nextRegistry) {
+        const key = String(m.id);
+        if (!statusesById[key]) statusesById[key] = 'ok';
     }
 
     setState({
         ...state,
         models: {
             ...state.models,
-            registry,
+            registry: nextRegistry,
+            selectedModelId,
             statusesById,
-            // selectedModelId: state.models.selectedModelId ?? registry?.[1]?.id ?? null,
-            selectedModelId: registry?.[0]?.id ?? null,
-            // },
         },
     });
 }
@@ -310,6 +320,18 @@ export function setSelectedModelId(state, setState, modelId) {
     setState({
         ...state,
         models: { ...state.models, selectedModelId: modelId },
+    });
+}
+
+
+export function setModelsStatusesById(state, setState, statusesById, { merge = true } = {}) {
+    const next = merge ? { ...state.models.statusesById, ...statusesById } : { ...statusesById };
+    setState({
+        ...state,
+        models: {
+            ...state.models,
+            statusesById: next,
+        },
     });
 }
 

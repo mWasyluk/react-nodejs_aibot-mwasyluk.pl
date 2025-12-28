@@ -2,10 +2,11 @@ import { Autocomplete, TextField } from "@mui/material";
 import { useTheme } from "styled-components";
 
 function ModelSelect(props) {
-    const { 
+    const {
         models = [],
+        statusesById = {},
         selectedModel = null,
-        selectModel = () => {},
+        selectModel = () => { },
     } = props;
     const theme = useTheme();
 
@@ -25,6 +26,16 @@ function ModelSelect(props) {
                 }
             }}
             disableClearable
+            renderOption={(props, option) => {
+                const status = statusesById[String(option.id)] || 'missing';
+                const color = status === 'ok' ? theme.colors.primary : theme.colors.error?.default || 'red';
+                return (
+                    <li {...props}>
+                        <span style={{ width: 8, height: 8, borderRadius: 999, marginRight: 8, background: color, display: 'inline-block' }} />
+                        {option.title}
+                    </li>
+                );
+            }}
             renderInput={(params) => (
                 <TextField
                     {...params}
@@ -35,14 +46,14 @@ function ModelSelect(props) {
                         '& .MuiInputBase-input': {
                             color: theme.colors.text.primary,
                         },
-                        '& .MuiInput-underline:before': { 
-                            borderBottomColor: theme.colors.text.primary 
+                        '& .MuiInput-underline:before': {
+                            borderBottomColor: theme.colors.text.primary
                         },
-                        '& .MuiInput-underline:after': { 
-                            borderBottomColor: theme.colors.text.primary 
+                        '& .MuiInput-underline:after': {
+                            borderBottomColor: theme.colors.text.primary
                         },
-                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { 
-                            borderBottomColor: theme.colors.text.secondary 
+                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
+                            borderBottomColor: theme.colors.text.secondary
                         },
                         '& .MuiInputLabel-root': {
                             color: theme.colors.text.secondary,

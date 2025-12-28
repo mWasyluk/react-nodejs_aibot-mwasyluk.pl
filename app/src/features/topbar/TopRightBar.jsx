@@ -1,11 +1,10 @@
-import React from 'react';
-import styled from 'styled-components';
+import { DarkMode, LightMode, Settings, Translate } from '@mui/icons-material';
 import { IconButton, Tooltip } from '@mui/material';
-import { DarkMode, LightMode, Translate, Settings } from '@mui/icons-material';
-import { useTheme } from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { useAppState } from '../../context/AppStateContext';
-import { LANGUAGE, THEME } from '../../state/constants';
 import { useI18n } from '../../hooks/useI18n';
+import { LANGUAGE, THEME } from '../../state/constants';
+import { isValidModelId } from '../../utils/model-util';
 
 const ModelName = styled.div`
   font-size: 12px;
@@ -23,11 +22,27 @@ const Wrap = styled.div`
   align-items: center;
 `;
 
+const STATUS_ICON = {
+  ok: "🟢",
+  error: "🔴",
+  missing: "⚫",
+  requiresConfig: "🟠",
+};
+
 export default function TopRightBar() {
   const theme = useTheme();
   const { state, actions, selectors } = useAppState();
-  const model = selectors.selectSelectedModel(state);
+
+  const registry = selectors.selectModelsRegistry(state);
+  const selectedModelId = selectors.selectSelectedModel(state)?.id;
+
+  const selectModelStatus = (modelId) => selectors.selectModelStatus(state, modelId)
   const { t } = useI18n();
+
+  const onChangeModel = (e) => {
+    const modelId = e.target.value || null;
+    actions.setSelectedModelId(modelId);
+  };
 
   const toggleTheme = () =>
     actions.setTheme(state.ui.theme === THEME.DARK ? THEME.LIGHT : THEME.DARK);
@@ -36,8 +51,30 @@ export default function TopRightBar() {
     actions.setLanguage(state.ui.language === LANGUAGE.PL ? LANGUAGE.EN : LANGUAGE.PL);
 
   return (
-    <Wrap>
-      <ModelName>{model?.title ?? 'No model'}</ModelName>
+    <Wrap className="topRightBar">
+      <ModelName>
+        <select
+          value={selectedModelId ?? ""}
+          onChange={onChangeModel}
+          className="topRightBar__modelSelect"
+          aria-label="Model"
+        >
+          {!isValidModelId(selectedModelId) && <option value="">Select model</option>}
+
+          {registry.map((m) => {
+            const status = selectModelStatus(m.id) ?? "missing";
+            const icon = STATUS_ICON[status] ?? "⚫";
+
+            const disabled = status === "missing" || status === "requiresConfig";
+
+            return (
+              <option key={m.id} value={m.id} disabled={disabled}>
+                {icon} {m.title ?? m.name ?? m.id}
+              </option>
+            );
+          })}
+        </select>
+      </ModelName>
 
       <Tooltip title={t.topbarThemeTooltip}>
         <IconButton onClick={toggleTheme} sx={{ color: theme.colors.text.primary }}>

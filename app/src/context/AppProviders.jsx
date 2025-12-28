@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { ThemeProvider } from 'styled-components';
-import { AppStateProvider, useAppState } from './AppStateContext';
-import { darkTheme, lightTheme } from '../theme';
+import { modelsRegistryService } from '../services/modelsRegistryService';
 import { THEME } from '../state/constants';
-import { MODELS_URL } from '../utils/api-util';
+import { darkTheme, lightTheme } from '../theme';
+import { AppStateProvider, useAppState } from './AppStateContext';
 
 function ThemeBridge({ children }) {
     const { state } = useAppState();
@@ -17,49 +17,39 @@ function ThemeBridge({ children }) {
 
 function ModelsBootstrapper() {
     const { state, actions } = useAppState();
-    const signleRef = useRef();
+    const singleRef = useRef(false);
 
     useEffect(() => {
-        // let cancelled = false;
-
-        // // If we already have models loaded (e.g. from localStorage), don’t spam the API.
-        // if (state.models.registry?.length) return;
-
-        if (signleRef.current) {
-            return;
-        }
-
-        signleRef.current = true;
+        if (singleRef.current) return;
+        singleRef.current = true;
 
         (async () => {
             try {
-                const res = await fetch(MODELS_URL);
-                if (!res.ok) throw new Error(`Failed to fetch models (${res.status})`);
+                const fetched = await modelsRegistryService.fetchRegistry();
 
-                /** @type {any[]} */
-                const raw = await res.json();
+                // Always (re)build statuses based on what the server currently returns.
+                const statusesFromServer = modelsRegistryService.buildStatuses(fetched);
 
-                // Backend returns models with shape: { id:number, title:string, modelName:string, ... }
-                // We keep `id` as number (backend matches strictly), and store `title` for UI.
-                const registry = (Array.isArray(raw) ? raw : []).map((m) => ({
-                    id: m.id,
-                    title: m.title ?? m.modelName ?? `model-${m.id}`,
-                    modelName: m.modelName,
-                }));
+                // Update registry only if it actually changed.
+                const changed = !modelsRegistryService.registryEquals(state.models.registry, fetched);
 
-                // if (!cancelled) {
-                actions.setModelsRegistry(registry);
-                // actions.setSelectedModelId(0);
-                // };
+                if (changed) {
+                    actions.setModelsRegistry(fetched);
+                }
+
+                // Even if registry didn't change, we still want statuses ASAP to reflect reality
+                // (e.g. previous "error" persisted locally should be corrected).
+                actions.setModelsStatusesById(statusesFromServer, { merge: true });
             } catch (e) {
-                // No chat? Nowhere to put a notification. Just log and let the UI show "No model".
+                // No chat? Nowhere to put a notification. Just log and let the UI show what it can.
                 console.error('[ModelsBootstrapper] ', e);
+
+                // If we have *no* models at all, reflect it in statuses (selector can display red).
+                // if (!state.models.registry?.length) {
+                actions.setModelsStatusesById({}, { merge: false });
+                // }
             }
         })();
-
-        // return () => {
-        //     signleRef.current = true;
-        // };
     }, [actions, state.models.registry]);
 
     return null;
