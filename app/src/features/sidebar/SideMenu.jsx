@@ -16,8 +16,9 @@ import CreateRoundedIcon from '@mui/icons-material/CreateRounded';
 import { IconButton, Tooltip, InputBase } from '@mui/material';
 import { useAppState } from '../../context/AppStateContext';
 import { useI18n } from '../../hooks/useI18n';
-import AppDialog, { useAppDialog } from '../../components/common/AppDialog';
-import { useToast } from '../../components/common/Toast';
+import AppDialog, { useAppDialog } from '../../notifications/AppDialog';
+import { useToast } from '../../notifications/Toast';
+import { alpha } from '../../utils/colorUtils';
 
 /* ============ STYLED COMPONENTS ============ */
 
@@ -30,12 +31,9 @@ const Wrap = styled.aside`
   gap: 12px;
   padding: 16px;
   border-radius: 40px;
-
-  ${({ theme }) => css`
-    background: ${theme.colors.surface}cc;
-    border: 1px solid ${theme.colors.border};
-    backdrop-filter: blur(6px);
-  `}
+  background: ${({ theme }) => theme.palette.surface};
+  border: 1px solid ${({ theme }) => theme.palette.border};
+  backdrop-filter: blur(6px);
 `;
 
 const Collapsed = styled.aside`
@@ -49,12 +47,9 @@ const Collapsed = styled.aside`
   gap: 8px;
   padding: 12px 6px;
   border-radius: 40px;
-
-  ${({ theme }) => css`
-    background: ${theme.colors.surface}cc;
-    border: 1px solid ${theme.colors.border};
-    backdrop-filter: blur(6px);
-  `}
+  background: ${({ theme }) => theme.palette.surface};
+  border: 1px solid ${({ theme }) => theme.palette.border};
+  backdrop-filter: blur(6px);
 `;
 
 /* Przycisk NOWY CHAT - full width, 48px height, 20px border-radius */
@@ -72,16 +67,13 @@ const NewChatButton = styled.button`
   font-size: 14px;
   font-weight: 600;
   transition: all 0.15s ease;
+  background: ${({ theme }) => theme.palette.surface};
+  color: ${({ theme }) => theme.palette.primary.main};
 
-  ${({ theme }) => css`
-    background: ${theme.colors.surface};
-    color: ${theme.colors.primary};
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.5);
-      border-color: ${theme.colors.primary}40;
-    }
-  `}
+  &:hover {
+    background: ${({ theme }) => alpha(theme.palette.common?.white || '#FFFFFF', 0.5)};
+    border-color: ${({ theme }) => alpha(theme.palette.primary.main, 0.25)};
+  }
 
   svg {
     width: 20px;
@@ -112,16 +104,25 @@ const TabButton = styled.button`
   transition: all 0.15s ease;
   white-space: nowrap;
 
-  ${({ theme, $active }) => css`
-    background: ${$active ? theme.colors.primary + '1A' : 'transparent'};
-    border-color: ${$active ? theme.colors.primary + '1A' : 'transparent'};
-    color: ${$active ? theme.colors.primary : theme.colors.text.primary};
+  ${({ theme, $active }) => {
+    const primaryColor = theme.palette.primary.main;
+    const textColor = theme.palette.text.primary;
 
-    &:hover {
-      background: ${$active ? theme.colors.primary + '1A' : 'rgba(255, 255, 255, 0.5)'};
-      border-color: ${$active ? theme.colors.primary + '1A' : theme.colors.primary + '40'};
-    }
-  `}
+    return css`
+      background: ${$active ? alpha(primaryColor, 0.1) : 'transparent'};
+      border-color: ${$active ? alpha(primaryColor, 0.1) : 'transparent'};
+      color: ${$active ? primaryColor : textColor};
+
+      &:hover {
+        background: ${$active
+        ? alpha(primaryColor, 0.1)
+        : alpha(theme.palette.common?.white || '#FFFFFF', 0.5)};
+        border-color: ${$active
+        ? alpha(primaryColor, 0.1)
+        : alpha(primaryColor, 0.25)};
+      }
+    `;
+  }}
 
   svg {
     width: 20px;
@@ -140,12 +141,14 @@ const SectionHeader = styled.div`
 const SectionTitle = styled.div`
   font-size: 13px;
   font-weight: 600;
+  color: ${({ theme }) => theme.palette.text.primary};
   opacity: 0.7;
   user-select: none;
 `;
 
 const SectionCount = styled.div`
   font-size: 12px;
+  color: ${({ theme }) => theme.palette.text.secondary};
   opacity: 0.5;
 `;
 
@@ -157,22 +160,28 @@ const SearchBar = styled.div`
   height: 48px;
   padding: 0 14px;
   border-radius: 20px;
-
-  ${({ theme }) => css`
-    background: ${theme.colors.surface};
-    border: 1px solid ${theme.colors.border};
-  `}
+  background: ${({ theme }) => theme.palette.surface};
+  border: 1px solid ${({ theme }) => theme.palette.border};
 
   svg {
     width: 20px;
     height: 20px;
+    color: ${({ theme }) => theme.palette.text.secondary};
     opacity: 0.6;
   }
 `;
 
 const SearchInput = styled(InputBase)`
-  flex: 1;
-  font-size: 13px;
+  && {
+    flex: 1;
+    font-size: 13px;
+    color: ${({ theme }) => theme.palette.text.primary};
+    
+    input::placeholder {
+      color: ${({ theme }) => theme.palette.text.secondary};
+      opacity: 0.7;
+    }
+  }
 `;
 
 /* Lista czatów */
@@ -186,9 +195,10 @@ const List = styled.div`
   &::-webkit-scrollbar {
     width: 6px;
   }
+  
   &::-webkit-scrollbar-thumb {
     border-radius: 6px;
-    background: rgba(0, 0, 0, 0.15);
+    background: ${({ theme }) => alpha(theme.palette.text.primary, 0.15)};
   }
 `;
 
@@ -215,24 +225,35 @@ const ChatItem = styled.button`
   align-items: center;
   gap: 10px;
   transition: all 0.15s ease;
+  background: transparent;
+  color: ${({ theme }) => theme.palette.text.primary};
 
-  ${({ theme, $active }) => css`
-    background: ${$active ? theme.colors.primary + '1A' : 'transparent'};
-    border-color: ${$active ? theme.colors.primary + '1A' : 'transparent'};
+  ${({ theme, $active }) => {
+    const primaryColor = theme.palette.primary.main;
 
-    &:hover {
-      background: ${$active ? theme.colors.primary + '1A' : 'rgba(255, 255, 255, 0.5)'};
-      border-color: ${$active ? theme.colors.primary + '1A' : theme.colors.primary + '40'};
-    }
+    return css`
+      background: ${$active ? alpha(primaryColor, 0.1) : 'transparent'};
+      border-color: ${$active ? alpha(primaryColor, 0.1) : 'transparent'};
 
-    &:hover ${ItemActions} {
-      opacity: 1;
-    }
-  `}
+      &:hover {
+        background: ${$active
+        ? alpha(primaryColor, 0.1)
+        : alpha(theme.palette.common?.white || '#FFFFFF', 0.5)};
+        border-color: ${$active
+        ? alpha(primaryColor, 0.1)
+        : alpha(primaryColor, 0.25)};
+      }
+
+      &:hover ${ItemActions} {
+        opacity: 1;
+      }
+    `;
+  }}
 
   > svg {
     width: 20px;
     height: 20px;
+    color: ${({ theme }) => theme.palette.text.secondary};
     opacity: 0.7;
     flex-shrink: 0;
   }
@@ -252,10 +273,12 @@ const ChatItemTitle = styled.div`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: ${({ theme }) => theme.palette.text.primary};
 `;
 
 const ChatItemMeta = styled.div`
   font-size: 11px;
+  color: ${({ theme }) => theme.palette.text.secondary};
   opacity: 0.6;
 `;
 
@@ -263,19 +286,15 @@ const ChatItemMeta = styled.div`
 const DeleteButton = styled(IconButton)`
   && {
     padding: 4px;
-    
+    color: ${({ theme }) => theme.palette.error.main};
     
     &:hover {
-      background: ${({ theme }) => theme.colors.error.background};
+      background: ${({ theme }) => theme.palette.error.light};
     }
 
     svg {
       width: 20px;
       height: 20px;
-    }
-
-    svg * {
-      fill: ${({ theme }) => theme.colors.error.default};
     }
   }
 `;
@@ -284,6 +303,12 @@ const DeleteButton = styled(IconButton)`
 const SmallIconButton = styled(IconButton)`
   && {
     padding: 4px;
+    color: ${({ theme }) => theme.palette.text.secondary};
+    
+    &:hover {
+      background: ${({ theme }) => alpha(theme.palette.primary.main, 0.1)};
+      color: ${({ theme }) => theme.palette.primary.main};
+    }
     
     svg {
       width: 20px;
@@ -300,11 +325,8 @@ const UserCard = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
-
-  ${({ theme }) => css`
-    background: ${theme.colors.surface};
-    border: 1px solid ${theme.colors.border};
-  `}
+  background: ${({ theme }) => theme.palette.surface};
+  border: 1px solid ${({ theme }) => theme.palette.border};
 `;
 
 const UserAvatar = styled.div`
@@ -314,11 +336,8 @@ const UserAvatar = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-
-  ${({ theme }) => css`
-    background: ${theme.colors.primary}22;
-    color: ${theme.colors.primary};
-  `}
+  background: ${({ theme }) => alpha(theme.palette.primary.main, 0.13)};
+  color: ${({ theme }) => theme.palette.primary.main};
 
   svg {
     width: 24px;
@@ -337,10 +356,12 @@ const UserInfo = styled.div`
 const UserName = styled.div`
   font-size: 13px;
   font-weight: 600;
+  color: ${({ theme }) => theme.palette.text.primary};
 `;
 
 const UserHint = styled.div`
   font-size: 11px;
+  color: ${({ theme }) => theme.palette.text.secondary};
   opacity: 0.6;
 `;
 
@@ -349,6 +370,7 @@ const FooterLinks = styled.div`
   justify-content: center;
   gap: 4px;
   font-size: 11px;
+  color: ${({ theme }) => theme.palette.text.secondary};
   opacity: 0.5;
   
   a {
@@ -359,6 +381,13 @@ const FooterLinks = styled.div`
       opacity: 0.8;
     }
   }
+`;
+
+const EmptyMessage = styled.div`
+  font-size: 13px;
+  color: ${({ theme }) => theme.palette.text.secondary};
+  opacity: 0.6;
+  padding: 8px 10px;
 `;
 
 /* ============ HELPER FUNCTIONS ============ */
@@ -385,7 +414,7 @@ export default function SideMenu() {
   const [query, setQuery] = useState('');
 
   // Dialog state
-  const { dialogProps, openDialog, closeDialog } = useAppDialog();
+  const { dialogProps, openDialog } = useAppDialog();
 
   const normalizedQuery = query.trim().toLowerCase();
 
@@ -414,7 +443,12 @@ export default function SideMenu() {
     });
   }, [chats, mode, normalizedQuery, state.messages.byChatId]);
 
-  const onNewChat = () => actions.createChat({ title: t.newChatDefaultTitle });
+  const onNewChat = useCallback(() => {
+    // actions.createChat({ title: t.newChatDefaultTitle });
+    // const newChatId = actions.createChat();
+    actions.setCurrentChat(null);
+    // }, [actions, t.newChatDefaultTitle]);
+  }, [actions]);
 
   // Validation function for chat title
   const validateChatTitle = useCallback((value) => {
@@ -467,12 +501,11 @@ export default function SideMenu() {
     });
   }, [openDialog, actions, showSuccess, t]);
 
-  const onToggle = () => {
-    console.log(isOpen)
-    actions.setSideMenuOpen(!isOpen)
-  };
+  const onToggle = useCallback(() => {
+    actions.setSideMenuOpen(!isOpen);
+  }, [actions, isOpen]);
 
-  const onSetMode = (newMode) => {
+  const onSetMode = useCallback((newMode) => {
     if (mode === newMode) {
       setMode('recent');
       setQuery('');
@@ -482,37 +515,39 @@ export default function SideMenu() {
         setQuery('');
       }
     }
-  };
+  }, [mode]);
 
-  const getEmptyMessage = () => {
+  const getEmptyMessage = useCallback(() => {
     if (mode === 'archive') return t.sideNoArchivedChats || 'No archived chats.';
     if (mode === 'search' && normalizedQuery) return t.sideNoSearchResults || 'No results found.';
     return t.sideNoChatsYet;
-  };
+  }, [mode, normalizedQuery, t]);
 
-  const menuIcon = isOpen ? <MenuOpen style={{ width: 20, height: 20 }} /> : <Menu style={{ width: 20, height: 20 }} />;
+  const menuIcon = isOpen
+    ? <MenuOpen style={{ width: 20, height: 20 }} />
+    : <Menu style={{ width: 20, height: 20 }} />;
 
   /* ===== COLLAPSED STATE ===== */
   if (!isOpen) {
     return (
       <>
         <Collapsed>
-          <Tooltip title={t.sideOpenMenuTooltip}>
+          <Tooltip disableInteractive title={t.sideOpenMenuTooltip}>
             <IconButton onClick={onToggle} size="small">
               {menuIcon}
             </IconButton>
           </Tooltip>
-          <Tooltip title={t.sideNewChatTooltip}>
+          <Tooltip disableInteractive title={t.sideNewChatTooltip}>
             <IconButton onClick={onNewChat} size="small">
               <Add style={{ width: 20, height: 20 }} />
             </IconButton>
           </Tooltip>
-          <Tooltip title={t.sideSearchTooltip}>
+          <Tooltip disableInteractive title={t.sideSearchTooltip}>
             <IconButton onClick={() => { onToggle(); setMode('search'); }} size="small">
               <Search style={{ width: 20, height: 20 }} />
             </IconButton>
           </Tooltip>
-          <Tooltip title={t.sideArchiveTooltip}>
+          <Tooltip disableInteractive title={t.sideArchiveTooltip}>
             <IconButton onClick={() => { onToggle(); setMode('archive'); }} size="small">
               <ArchiveOutlined style={{ width: 20, height: 20 }} />
             </IconButton>
@@ -529,7 +564,7 @@ export default function SideMenu() {
       <Wrap>
         {/* Header z toggle */}
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Tooltip title={t.sideCollapseTooltip}>
+          <Tooltip disableInteractive title={t.sideCollapseTooltip}>
             <IconButton onClick={onToggle} size="small">
               {menuIcon}
             </IconButton>
@@ -537,7 +572,7 @@ export default function SideMenu() {
         </div>
 
         {/* Przycisk NOWY CHAT */}
-        <NewChatButton onClick={onNewChat}>
+        <NewChatButton onClick={onNewChat} type="button">
           <Add />
           {t.sideNewChatButton || 'NOWY CHAT'}
         </NewChatButton>
@@ -547,6 +582,7 @@ export default function SideMenu() {
           <TabButton
             $active={mode === 'search'}
             onClick={() => onSetMode('search')}
+            type="button"
           >
             <Search />
             {t.sideSearchButton || 'SZUKAJ'}
@@ -554,6 +590,7 @@ export default function SideMenu() {
           <TabButton
             $active={mode === 'archive'}
             onClick={() => onSetMode('archive')}
+            type="button"
           >
             <ArchiveOutlined />
             {t.sideArchiveButton || 'ARCHIWUM'}
@@ -588,9 +625,7 @@ export default function SideMenu() {
         {/* Lista czatów */}
         <List>
           {filteredChats.length === 0 ? (
-            <div style={{ fontSize: 13, opacity: 0.6, padding: '8px 10px' }}>
-              {getEmptyMessage()}
-            </div>
+            <EmptyMessage>{getEmptyMessage()}</EmptyMessage>
           ) : (
             filteredChats.map((c) => (
               <ChatItem
@@ -609,7 +644,7 @@ export default function SideMenu() {
                 </ChatItemText>
 
                 <ItemActions onClick={(e) => e.stopPropagation()}>
-                  <Tooltip title={t.sideChangeChatTitleTooltip}>
+                  <Tooltip disableInteractive title={t.sideChangeChatTitleTooltip}>
                     <SmallIconButton
                       size="small"
                       onClick={() => invokeTitleChange(c.id)}
@@ -618,7 +653,7 @@ export default function SideMenu() {
                     </SmallIconButton>
                   </Tooltip>
 
-                  <Tooltip title={c.archived ? t.sideUnarchiveTooltip : t.sideArchiveItemTooltip}>
+                  <Tooltip disableInteractive title={c.archived ? t.sideUnarchiveTooltip : t.sideArchiveItemTooltip}>
                     <SmallIconButton
                       size="small"
                       onClick={() => actions.archiveChat(c.id, !c.archived)}
@@ -627,12 +662,12 @@ export default function SideMenu() {
                     </SmallIconButton>
                   </Tooltip>
 
-                  <Tooltip title={t.sideDeleteChatTooltip}>
+                  <Tooltip disableInteractive title={t.sideDeleteChatTooltip}>
                     <DeleteButton
                       size="small"
                       onClick={() => invokeDeleteChat(c.id)}
                     >
-                      <DeleteOutline color="error" />
+                      <DeleteOutline />
                     </DeleteButton>
                   </Tooltip>
                 </ItemActions>
@@ -654,9 +689,9 @@ export default function SideMenu() {
 
         {/* Linki w stopce */}
         <FooterLinks>
-          <a href="#">{t.sideTermsLink || 'Regulamin'}</a>
+          <a href="/docs">{t.sideTermsLink || 'Regulamin'}</a>
           <span>i</span>
-          <a href="#">{t.sidePrivacyLink || 'polityka prywatności'}</a>
+          <a href="/docs">{t.sidePrivacyLink || 'polityka prywatności'}</a>
         </FooterLinks>
       </Wrap>
 

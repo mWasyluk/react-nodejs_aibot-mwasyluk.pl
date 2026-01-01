@@ -7,7 +7,7 @@ import { createT } from '../loc/i18n';
  *
  * Usage:
  * const { t } = useI18n();
- * <Tooltip title={t.topbarThemeTooltip} />
+ * <Tooltip disableInteractive title={t.topbarThemeTooltip} />
  */
 export function useI18n() {
   const { state } = useAppState();

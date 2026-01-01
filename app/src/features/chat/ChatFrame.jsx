@@ -1,9 +1,14 @@
-import React, { useMemo } from 'react';
-import styled, { css } from 'styled-components';
+import React, { useMemo, useCallback, useEffect } from 'react';
+import styled from 'styled-components';
 import { useAppState } from '../../context/AppStateContext';
+import { useI18n } from '../../hooks/useI18n';
 import TopRightBar from '../topbar/TopRightBar';
+import ModelSelector from '../topbar/ModelSelector';
 import MessageList from './MessageList';
 import InputBar from './InputBar';
+import WelcomeScreen from './WelcomeScreen';
+
+/* ============ STYLED COMPONENTS ============ */
 
 const Wrap = styled.section`
   flex: 1;
@@ -11,55 +16,49 @@ const Wrap = styled.section`
   display: flex;
   flex-direction: column;
   min-width: 0;
+  position: relative;
+  overflow: hidden;
+  padding: 20px;
+  background: ${({ theme }) => theme.palette.surface};
+  border: 1px solid ${({ theme }) => theme.palette.border};
+  border-radius: 24px;
 
-  ${({ theme }) => css`
-    background: ${theme.colors.surface}cc;
-    border: 1px solid ${theme.colors.border};
-    border-radius: 18px;
-    backdrop-filter: blur(6px);
-    overflow: hidden;
-  `}
+  /* Dark mode blue glow effect from design */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 300px;
+    background: ${({ theme }) => theme.palette.gradientGlow || 'transparent'};
+    pointer-events: none;
+    z-index: 0;
+  }
 `;
 
 const Header = styled.header`
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 12px;
-  padding: 12px 14px;
-
-  ${({ theme }) => css`
-    border-bottom: 1px solid ${theme.colors.border};
-  `}
-`;
-
-const HeaderTitle = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  flex: 1;
-`;
-
-const HeaderTopRow = styled.div`
-  display: flex;
-  align-items: center;
   justify-content: space-between;
   gap: 12px;
+  position: relative;
+  z-index: 999;
+`;
+
+const HeaderLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
   min-width: 0;
 `;
 
-const Title = styled.div`
-  font-size: 14px;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
-const Subtitle = styled.div`
-  font-size: 12px;
-  opacity: 0.7;
+const HeaderRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 `;
 
 const Body = styled.div`
@@ -67,77 +66,87 @@ const Body = styled.div`
   min-height: 0;
   display: flex;
   flex-direction: column;
+  position: relative;
+  gap: 10px;
+  z-index: 1;
 `;
 
-const Empty = styled.div`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+const Disclaimer = styled.div`
   text-align: center;
-  padding: 24px;
+  font-size: 11px;
+  color: ${({ theme }) => theme.palette.text.secondary};
+  opacity: 0.7;
 `;
 
-const EmptyCard = styled.div`
-  max-width: 520px;
-  width: 100%;
-  padding: 22px 18px;
-  border-radius: 16px;
-
-  ${({ theme }) => css`
-    background: ${theme.colors.background}55;
-    border: 1px dashed ${theme.colors.border};
-  `}
-`;
-
-const EmptyTitle = styled.div`
-  font-size: 20px;
-  font-weight: 800;
-  margin-bottom: 8px;
-`;
-
-const EmptyText = styled.div`
-  font-size: 13px;
-  opacity: 0.75;
-  line-height: 1.6;
-`;
+/* ============ COMPONENT ============ */
 
 export default function ChatFrame() {
-  const { state, selectors } = useAppState();
-  const chat = useMemo(() => selectors.selectCurrentChat(state), [state, selectors]);
+  const { state, actions, selectors } = useAppState();
+  const { t } = useI18n();
 
-  const hasChat = !!state.chats.currentChatId && !!chat;
+  const chat = useMemo(
+    () => selectors.selectCurrentChat(state),
+    [state, selectors]
+  );
+
+  const hasChat = useMemo(() => Boolean(state.chats.currentChatId && chat), [state.chats.currentChatId]);
+  const hasMessages = useMemo(() => (hasChat && Boolean(state.messages.byChatId[state.chats.currentChatId]?.length)), [hasChat, state.chats.currentChatId]);
+  const showWelcome = useMemo(() => (!hasChat || !hasMessages), [hasChat, hasMessages]);
+
+  // Handler dla szybkich akcji z WelcomeScreen
+  const handleQuickAction = useCallback((actionId) => {
+    // Mapowanie akcji na prompty
+    const actionPrompts = {
+      riddle: t.promptRiddle || 'Wymyśl dla mnie ciekawą zagadkę logiczną.',
+      answer: t.promptAnswer || 'Mam zagadkę, pomóż mi ją rozwiązać.',
+      code: t.promptCode || 'Pomóż mi napisać kod.',
+      story: t.promptStory || 'Napisz krótkie opowiadanie.',
+      plan: t.promptPlan || 'Pomóż mi przygotować plan działania.',
+      analyze: t.promptAnalyze || 'Przeanalizuj temat, który zaraz ci podam.',
+    };
+
+    const prompt = actionPrompts[actionId];
+    if (prompt) {
+      // Tworzymy nowy czat z domyślnym tytułem
+      const newChatId = actions.createChat({ title: prompt.substring(0, 50) });
+      // Dodajemy wiadomość użytkownika
+      actions.addUserMessage(newChatId, prompt);
+
+      // TODO: Tu można uruchomić streaming odpowiedzi
+      // Na razie tylko tworzymy czat z wiadomością
+    }
+  }, [actions, t]);
+
+  const userName = t.sideUserAnonymous || 'Anonimowy';
+  const disclaimer = t.inputDisclaimer || 'Wszystkie modele mogą popełniać błędy. Sprawdzaj ważne informacje.';
 
   return (
     <Wrap>
       <Header>
-        <HeaderTitle>
-          <HeaderTopRow>
-            <Title>{hasChat ? (chat.title || 'Untitled chat') : 'AiBot'}</Title>
-            <TopRightBar />
-          </HeaderTopRow>
-          <Subtitle>{hasChat ? 'Active conversation' : 'Start a new chat from the sidebar'}</Subtitle>
-        </HeaderTitle>
+        <HeaderLeft>
+          <ModelSelector />
+        </HeaderLeft>
+        <HeaderRight>
+          <TopRightBar />
+        </HeaderRight>
       </Header>
 
       <Body>
-        {!hasChat ? (
-          <Empty>
-            <EmptyCard>
-              <EmptyTitle>Welcome.</EmptyTitle>
-              <EmptyText>
-                Pick a chat on the left or create a new one.
-                <br />
-                No LLM logic yet. Just a well-behaved layout that doesn’t collapse into a single 900-line component.
-              </EmptyText>
-            </EmptyCard>
-          </Empty>
+        {showWelcome ? (
+          <>
+            <WelcomeScreen
+              userName={userName}
+              onActionClick={handleQuickAction}
+            />
+            <InputBar chatId={null} />
+          </>
         ) : (
           <>
             <MessageList chatId={state.chats.currentChatId} />
             <InputBar chatId={state.chats.currentChatId} />
           </>
         )}
+        <Disclaimer>{disclaimer}</Disclaimer>
       </Body>
     </Wrap>
   );

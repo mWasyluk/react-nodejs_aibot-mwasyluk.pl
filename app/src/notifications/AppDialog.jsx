@@ -12,8 +12,8 @@ const StyledDialog = styled(Dialog)`
     max-width: 480px;
     
     ${({ theme }) => css`
-      background: ${theme.colors.surface};
-      border: 1px solid ${theme.colors.border};
+      background: ${theme.palette.surface};
+      border: 1px solid ${theme.palette.border};
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
     `}
   }
@@ -34,8 +34,8 @@ const StyledDialogTitle = styled(DialogTitle)`
     font-weight: 700;
     
     ${({ theme }) => css`
-      color: ${theme.colors.text.primary};
-      border-bottom: 1px solid ${theme.colors.border};
+      color: ${theme.palette.text.primary};
+      border-bottom: 1px solid ${theme.palette.border};
     `}
   }
 `;
@@ -46,10 +46,10 @@ const CloseButton = styled(IconButton)`
     margin: -6px -8px -6px 8px;
     
     ${({ theme }) => css`
-      color: ${theme.colors.text.secondary};
+      color: ${theme.palette.text.secondary};
       
       &:hover {
-        background: ${theme.colors.border};
+        background: ${theme.palette.border};
       }
     `}
     
@@ -65,7 +65,7 @@ const StyledDialogContent = styled(DialogContent)`
     padding: 20px;
     
     ${({ theme }) => css`
-      color: ${theme.colors.text.primary};
+      color: ${theme.palette.text.primary};
     `}
   }
 `;
@@ -76,7 +76,7 @@ const StyledDialogActions = styled(DialogActions)`
     gap: 8px;
     
     ${({ theme }) => css`
-      border-top: 1px solid ${theme.colors.border};
+      border-top: 1px solid ${theme.palette.border};
     `}
   }
 `;
@@ -92,7 +92,7 @@ const InputLabel = styled.label`
   font-weight: 500;
   
   ${({ theme }) => css`
-    color: ${theme.colors.text.secondary};
+    color: ${theme.palette.text.secondary};
   `}
 `;
 
@@ -106,17 +106,17 @@ const StyledInput = styled.input`
   transition: all 0.15s ease;
   
   ${({ theme, $hasError }) => css`
-    background: ${theme.colors.background};
-    border: 1px solid ${$hasError ? theme.colors.error.default : theme.colors.border};
-    color: ${theme.colors.text.primary};
+    background: ${theme.palette.background.default};
+    border: 1px solid ${$hasError ? theme.palette.error.main : theme.palette.border};
+    color: ${theme.palette.text.primary};
     
     &:focus {
-      border-color: ${$hasError ? theme.colors.error.default : theme.colors.primary};
-      box-shadow: 0 0 0 3px ${$hasError ? theme.colors.error.default + '22' : theme.colors.primary + '22'};
+      border-color: ${$hasError ? theme.palette.error.main : theme.palette.primary.main};
+      box-shadow: 0 0 0 3px ${$hasError ? theme.palette.error.main + '22' : theme.palette.primary.main + '22'};
     }
     
     &::placeholder {
-      color: ${theme.colors.text.secondary};
+      color: ${theme.palette.text.secondary};
       opacity: 0.6;
     }
   `}
@@ -127,7 +127,7 @@ const ErrorText = styled.div`
   min-height: 18px;
   
   ${({ theme }) => css`
-    color: ${theme.colors.error.default};
+    color: ${theme.palette.error.main};
   `}
 `;
 
@@ -144,11 +144,11 @@ const DialogButton = styled.button`
   ${({ theme, $variant }) => {
     if ($variant === 'primary') {
       return css`
-        background: ${theme.colors.primary};
-        color: #FFFFFF;
+        background: ${theme.palette.primary.main};
+        color: ${theme.palette.primary.contrastText};
         
         &:hover:not(:disabled) {
-          background: ${theme.colors.primary}dd;
+          background: ${theme.palette.primary.dark};
         }
         
         &:disabled {
@@ -157,16 +157,16 @@ const DialogButton = styled.button`
         }
       `;
     }
-    
+
     // secondary / cancel
     return css`
       background: transparent;
-      border-color: ${theme.colors.border};
-      color: ${theme.colors.text.primary};
+      border-color: ${theme.palette.border};
+      color: ${theme.palette.text.primary};
       
       &:hover {
-        background: ${theme.colors.background};
-        border-color: ${theme.colors.text.secondary};
+        background: ${theme.palette.background.default};
+        border-color: ${theme.palette.text.secondary};
       }
     `;
   }}
@@ -178,7 +178,7 @@ const ContentText = styled.p`
   line-height: 1.6;
   
   ${({ theme }) => css`
-    color: ${theme.colors.text.primary};
+    color: ${theme.palette.text.primary};
   `}
 `;
 
@@ -187,7 +187,7 @@ const ContentText = styled.p`
 /**
  * AppDialog - Uniwersalny komponent dialogu w stylistyce aplikacji.
  * 
- * Wspiera dwa główne tryby:
+ * Wspiera trzy główne tryby:
  * 1. Input dialog (type="input") - z polem tekstowym i walidacją inline
  * 2. Confirm dialog (type="confirm") - prosty dialog potwierdzenia
  * 3. Alert dialog (type="alert") - informacyjny, tylko zamknięcie
@@ -238,7 +238,7 @@ export default function AppDialog({
   const handleInputChange = useCallback((e) => {
     const value = e.target.value;
     setInputValue(value);
-    
+
     if (touched && validate) {
       const validationError = validate(value);
       setError(validationError || '');
@@ -297,7 +297,7 @@ export default function AppDialog({
           <Close />
         </CloseButton>
       </StyledDialogTitle>
-      
+
       <StyledDialogContent>
         {type === 'input' ? (
           <InputWrapper>
@@ -317,7 +317,7 @@ export default function AppDialog({
           <ContentText>{message}</ContentText>
         )}
       </StyledDialogContent>
-      
+
       <StyledDialogActions>
         {showCancel && type !== 'alert' && (
           <DialogButton $variant="secondary" onClick={onClose}>

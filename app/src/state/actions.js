@@ -56,7 +56,7 @@ export function createChat(state, setState, { title = 'New chat' } = {}) {
 }
 
 export function setCurrentChat(state, setState, chatId) {
-    if (!chatId || !state.chats.byId[chatId]) return;
+    // if (!chatId || !state.chats.byId[chatId]) return;
 
     setState({
         ...state,
@@ -138,6 +138,7 @@ export function deleteChat(state, setState, chatId) {
 }
 
 export function addUserMessage(state, setState, chatId, text) {
+    console.log("addUserMessage", chatId, text);
     if (!chatId || !text?.trim()) return null;
 
     const msg = {

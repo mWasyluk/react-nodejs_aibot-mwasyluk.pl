@@ -16,7 +16,7 @@ const ToastContainer = styled.div`
   
   ${({ theme, $type }) => {
     const colors = getToastColors(theme, $type);
-    
+
     return css`
       background: ${colors.background};
       border: 1px solid ${colors.border};
@@ -35,7 +35,7 @@ const IconWrapper = styled.div`
   
   ${({ theme, $type }) => {
     const colors = getToastColors(theme, $type);
-    
+
     return css`
       color: ${colors.icon};
       
@@ -61,7 +61,7 @@ const ToastTitle = styled.div`
   line-height: 1.4;
   
   ${({ theme }) => css`
-    color: ${theme.colors.text.primary};
+    color: ${theme.palette.text.primary};
   `}
 `;
 
@@ -70,7 +70,7 @@ const ToastMessage = styled.div`
   line-height: 1.5;
   
   ${({ theme }) => css`
-    color: ${theme.colors.text.secondary};
+    color: ${theme.palette.text.secondary};
   `}
 `;
 
@@ -81,10 +81,10 @@ const CloseButton = styled(IconButton)`
     flex-shrink: 0;
     
     ${({ theme }) => css`
-      color: ${theme.colors.text.secondary};
+      color: ${theme.palette.text.secondary};
       
       &:hover {
-        background: ${theme.colors.border};
+        background: ${theme.palette.border};
       }
     `}
     
@@ -101,28 +101,28 @@ function getToastColors(theme, type) {
   switch (type) {
     case 'success':
       return {
-        background: theme.colors.surface,
-        border: '#4CAF50',
-        icon: '#4CAF50',
+        background: theme.palette.surface,
+        border: theme.palette.success.main,
+        icon: theme.palette.success.main,
       };
     case 'warning':
       return {
-        background: theme.colors.surface,
-        border: '#FF9800',
-        icon: '#FF9800',
+        background: theme.palette.surface,
+        border: theme.palette.warning.main,
+        icon: theme.palette.warning.main,
       };
     case 'error':
       return {
-        background: theme.colors.surface,
-        border: theme.colors.error.default,
-        icon: theme.colors.error.default,
+        background: theme.palette.surface,
+        border: theme.palette.error.main,
+        icon: theme.palette.error.main,
       };
     case 'info':
     default:
       return {
-        background: theme.colors.surface,
-        border: theme.colors.primary,
-        icon: theme.colors.primary,
+        background: theme.palette.surface,
+        border: theme.palette.primary.main,
+        icon: theme.palette.primary.main,
       };
   }
 }
@@ -241,12 +241,12 @@ export function ToastProvider({ children }) {
           <IconWrapper $type={toast.type}>
             {getToastIcon(toast.type)}
           </IconWrapper>
-          
+
           <ContentWrapper>
             {toast.title && <ToastTitle>{toast.title}</ToastTitle>}
             <ToastMessage>{toast.message}</ToastMessage>
           </ContentWrapper>
-          
+
           <CloseButton onClick={hideToast} aria-label="Close notification">
             <Close />
           </CloseButton>
@@ -283,11 +283,11 @@ export function ToastProvider({ children }) {
  */
 export function useToast() {
   const context = useContext(ToastContext);
-  
+
   if (!context) {
     throw new Error('useToast must be used within ToastProvider');
   }
-  
+
   return context;
 }
 
@@ -324,12 +324,12 @@ export function Toast({
         <IconWrapper $type={type}>
           {getToastIcon(type)}
         </IconWrapper>
-        
+
         <ContentWrapper>
           {title && <ToastTitle>{title}</ToastTitle>}
           <ToastMessage>{message}</ToastMessage>
         </ContentWrapper>
-        
+
         <CloseButton onClick={onClose} aria-label="Close notification">
           <Close />
         </CloseButton>

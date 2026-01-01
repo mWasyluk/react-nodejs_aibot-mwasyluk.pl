@@ -5,10 +5,47 @@
  * Add new keys here first (EN), then mirror them in PL.
  */
 export const en = Object.freeze({
-  // TopRightBar
+  // TopRightBar / Settings
   topbarThemeTooltip: 'Theme',
   topbarLanguageTooltip: 'Language',
-  topbarSettingsTooltip: 'Settings (not wired yet)',
+  topbarSettingsTooltip: 'Settings',
+  settingsTheme: 'Theme',
+  settingsThemeLight: 'Light',
+  settingsThemeDark: 'Dark',
+  settingsLanguage: 'Language',
+
+  // Model Selector
+  modelSelectLabel: 'Model',
+  modelSelectPlaceholder: 'Select model',
+  modelErrorNotFound: 'Model not found',
+
+  // Welcome Screen
+  welcomeGreeting: 'Tell me,',
+  welcomeTitle: 'What shall we start with today?',
+  welcomeSubtitle: 'Choose one of the options to start a chat with a predefined action, or type your own command in the field below.',
+  welcomeActionRiddle: 'Create a logic riddle',
+  welcomeActionAnswer: 'Answer a riddle',
+  welcomeActionCode: 'Write code',
+  welcomeActionStory: 'Write a story',
+  welcomeActionPlan: 'Prepare an action plan',
+  welcomeActionAnalyze: 'Analyze a topic',
+
+  // Quick action prompts
+  promptRiddle: 'Create an interesting logic riddle for me.',
+  promptAnswer: 'I have a riddle, help me solve it.',
+  promptCode: 'Help me write some code.',
+  promptStory: 'Write a short story.',
+  promptPlan: 'Help me prepare an action plan.',
+  promptAnalyze: 'Analyze the topic I will give you.',
+
+  // InputBar
+  inputPlaceholder: 'How can I help you today?',
+  inputSend: 'Send',
+  inputMoreOptions: 'More options',
+  inputSaveLocal: 'Save locally',
+  inputThinking: 'Thinking',
+  inputDisclaimer: 'All models can make mistakes. Verify important information.',
+  inputMultilineHint: 'Enter to send, Shift+Enter for a new line.',
 
   // SideMenu
   sideOpenMenuTooltip: 'Open menu',
@@ -43,9 +80,6 @@ export const en = Object.freeze({
   sideDeleteChatConfirm: 'Are you sure you want to delete this chat?',
   sideTermsLink: 'Terms',
   sidePrivacyLink: 'privacy policy',
-
-  // InputBar
-  inputMultilineHint: 'Enter to send, Shift+Enter for a new line.',
 
   // Generic
   newChatDefaultTitle: 'New chat',

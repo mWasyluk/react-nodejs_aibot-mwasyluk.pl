@@ -1,8 +1,45 @@
 export const pl = Object.freeze({
-  // TopRightBar
+  // TopRightBar / Settings
   topbarThemeTooltip: 'Motyw',
   topbarLanguageTooltip: 'Język',
-  topbarSettingsTooltip: 'Ustawienia (jeszcze nie podłączone)',
+  topbarSettingsTooltip: 'Ustawienia',
+  settingsTheme: 'Motyw',
+  settingsThemeLight: 'Jasny',
+  settingsThemeDark: 'Ciemny',
+  settingsLanguage: 'Język',
+
+  // Model Selector
+  modelSelectLabel: 'Model',
+  modelSelectPlaceholder: 'Wybierz model',
+  modelErrorNotFound: 'Model nie znaleziony',
+
+  // Welcome Screen
+  welcomeGreeting: 'Powiedz mi,',
+  welcomeTitle: 'Od czego zaczniemy tym razem?',
+  welcomeSubtitle: 'Wybierz jedną z opcji, aby rozpocząć czat od zdefiniowanej akcji, lub wpisz swoją własną komendę w oknie poniżej.',
+  welcomeActionRiddle: 'Wymyśl zagadkę logiczną',
+  welcomeActionAnswer: 'Odpowiedz na zagadkę',
+  welcomeActionCode: 'Napisz kod',
+  welcomeActionStory: 'Napisz opowiadanie',
+  welcomeActionPlan: 'Przygotuj plan działania',
+  welcomeActionAnalyze: 'Przeanalizuj temat',
+
+  // Quick action prompts
+  promptRiddle: 'Wymyśl dla mnie ciekawą zagadkę logiczną.',
+  promptAnswer: 'Mam zagadkę, pomóż mi ją rozwiązać.',
+  promptCode: 'Pomóż mi napisać kod.',
+  promptStory: 'Napisz krótkie opowiadanie.',
+  promptPlan: 'Pomóż mi przygotować plan działania.',
+  promptAnalyze: 'Przeanalizuj temat, który zaraz ci podam.',
+
+  // InputBar
+  inputPlaceholder: 'W czym mogę Ci dzisiaj pomóc?',
+  inputSend: 'Wyślij',
+  inputMoreOptions: 'Więcej opcji',
+  inputSaveLocal: 'Zapis lokalny',
+  inputThinking: 'Myślenie',
+  inputDisclaimer: 'Wszystkie modele mogą popełniać błędy. Sprawdzaj ważne informacje.',
+  inputMultilineHint: 'Enter aby wysłać, Shift+Enter aby dodać nową linię.',
 
   // SideMenu
   sideOpenMenuTooltip: 'Otwórz menu',
@@ -37,9 +74,6 @@ export const pl = Object.freeze({
   sideDeleteChatConfirm: 'Czy na pewno chcesz usunąć ten czat?',
   sideTermsLink: 'Regulamin',
   sidePrivacyLink: 'polityka prywatności',
-
-  // InputBar
-  inputMultilineHint: 'Enter aby wysłać, Shift+Enter aby dodać nową linię.',
 
   // Generic
   newChatDefaultTitle: 'Nowy czat',
@@ -80,7 +114,7 @@ export const pl = Object.freeze({
 
   // Toast - success
   toastSuccessTitle: 'Sukces',
-  toastSuccessSaved: 'Zmiany zapisane pomyślnie',
+  toastSuccessSaved: 'Zmiany zostały zapisane',
   toastSuccessChatRenamed: 'Nazwa czatu zmieniona',
   toastSuccessChatArchived: 'Czat zarchiwizowany',
   toastSuccessChatDeleted: 'Czat usunięty',

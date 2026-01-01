@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import { useAppState } from '../../context/AppStateContext';
 import { useI18n } from '../../hooks/useI18n';
+import { alpha } from '../../utils/colorUtils';
 
 /* ============ STYLED COMPONENTS ============ */
 
@@ -9,7 +10,7 @@ const Wrap = styled.div`
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding: 14px 14px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -17,9 +18,10 @@ const Wrap = styled.div`
   &::-webkit-scrollbar {
     width: 10px;
   }
+  
   &::-webkit-scrollbar-thumb {
     border-radius: 10px;
-    background: rgba(0, 0, 0, 0.22);
+    background: ${({ theme }) => alpha(theme.palette.text.primary, 0.22)};
   }
 `;
 
@@ -31,10 +33,10 @@ const MessageGroup = styled.div`
 
 const Row = styled.div`
   display: flex;
-  justify-content: ${({ $role }) => 
-    $role === 'user' ? 'flex-end' : 
-    $role === 'assistant' ? 'flex-start' : 
-    'center'
+  justify-content: ${({ $role }) =>
+    $role === 'user' ? 'flex-end' :
+      $role === 'assistant' ? 'flex-start' :
+        'center'
   };
 `;
 
@@ -46,20 +48,30 @@ const Bubble = styled.div`
   word-break: break-word;
   line-height: 1.55;
   font-size: 13px;
+  color: ${({ theme }) => theme.palette.text.primary};
 
   ${({ theme, $role, $status }) => {
     const isUser = $role === 'user';
     const isError = $role === 'error' || $status === 'error';
     const isCancelled = $status === 'cancelled';
 
+    // Domyślne style
+    let background = isUser
+      ? alpha(theme.palette.primary.main, 0.2)
+      : alpha(theme.palette.background.default, 0.55);
+    let borderColor = isUser
+      ? alpha(theme.palette.primary.main, 0.33)
+      : theme.palette.border;
+
+    // Style dla błędów
+    if (isError) {
+      background = theme.palette.error.light;
+      borderColor = alpha(theme.palette.error.main, 0.33);
+    }
+
     return css`
-      background: ${isUser ? theme.colors.primary + '33' : theme.colors.background + '55'};
-      border: 1px solid ${isUser ? theme.colors.primary + '55' : theme.colors.border};
-      
-      ${isError && css`
-        background: ${theme.colors.error.background};
-        border-color: ${theme.colors.error.default}55;
-      `}
+      background: ${background};
+      border: 1px solid ${borderColor};
       
       ${isCancelled && css`
         opacity: 0.7;
@@ -82,11 +94,8 @@ const ThinkingText = styled.div`
   font-size: 12px;
   font-weight: 300;
   font-style: italic;
-  
-  ${({ theme }) => css`
-    color: ${theme.colors.text.secondary};
-    opacity: 0.7;
-  `}
+  color: ${({ theme }) => theme.palette.text.secondary};
+  opacity: 0.7;
 `;
 
 const ThinkingLabel = styled.span`
@@ -94,21 +103,19 @@ const ThinkingLabel = styled.span`
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-right: 6px;
-  
-  ${({ theme }) => css`
-    color: ${theme.colors.text.secondary};
-    opacity: 0.5;
-  `}
+  color: ${({ theme }) => theme.palette.text.secondary};
+  opacity: 0.5;
 `;
 
 const Meta = styled.div`
   margin-top: 2px;
   font-size: 11px;
+  color: ${({ theme }) => theme.palette.text.secondary};
   opacity: 0.65;
-  text-align: ${({ $role }) => 
-    $role === 'user' ? 'right' : 
-    $role === 'assistant' ? 'left' : 
-    'center'
+  text-align: ${({ $role }) =>
+    $role === 'user' ? 'right' :
+      $role === 'assistant' ? 'left' :
+        'center'
   };
 `;
 
@@ -117,24 +124,18 @@ const StatusBadge = styled.span`
   padding: 2px 6px;
   border-radius: 4px;
   margin-left: 6px;
-  
+
   ${({ theme, $status }) => {
-    if ($status === 'cancelled') {
+    if ($status === 'cancelled' || $status === 'error') {
       return css`
-        background: ${theme.colors.error.background};
-        color: ${theme.colors.error.default};
-      `;
-    }
-    if ($status === 'error') {
-      return css`
-        background: ${theme.colors.error.background};
-        color: ${theme.colors.error.default};
+        background: ${theme.palette.error.light};
+        color: ${theme.palette.error.main};
       `;
     }
     if ($status === 'thinking' || $status === 'streaming') {
       return css`
-        background: ${theme.colors.primary}22;
-        color: ${theme.colors.primary};
+        background: ${alpha(theme.palette.primary.main, 0.13)};
+        color: ${theme.palette.primary.main};
       `;
     }
     return '';
@@ -143,6 +144,7 @@ const StatusBadge = styled.span`
 
 const EmptyState = styled.div`
   font-size: 13px;
+  color: ${({ theme }) => theme.palette.text.secondary};
   opacity: 0.75;
 `;
 
@@ -176,8 +178,9 @@ function getStatusLabel(status, t) {
 export default function MessageList({ chatId }) {
   const { state, selectors } = useAppState();
   const { t } = useI18n();
+
   const messages = useMemo(
-    () => selectors.selectMessagesForChat(state, chatId), 
+    () => selectors.selectMessagesForChat(state, chatId),
     [state, selectors, chatId]
   );
 
@@ -185,11 +188,13 @@ export default function MessageList({ chatId }) {
     return (
       <Wrap>
         <EmptyState>
-          No messages yet. Type something and pretend it's meaningful.
+          {t.messageListEmpty || 'No messages yet. Type something and pretend it\'s meaningful.'}
         </EmptyState>
       </Wrap>
     );
   }
+
+  console.log("messages", messages, "chatId", state.chats.currentChatId)
 
   return (
     <Wrap>
@@ -199,7 +204,7 @@ export default function MessageList({ chatId }) {
         const finalText = m?.content?.final ?? '';
         const thinkingText = m?.content?.thinking ?? '';
         const showCursor = status === 'streaming';
-        const displayText = finalText + (showCursor ? '▍' : '');
+        const displayText = finalText + (showCursor ? '▌' : '');
         const statusLabel = getStatusLabel(status, t);
 
         return (
@@ -213,7 +218,7 @@ export default function MessageList({ chatId }) {
                 </ThinkingText>
               </Row>
             )}
-            
+
             {/* Main message bubble - wyświetlany POD thinking */}
             {(displayText || status === 'thinking') && (
               <Row $role={role}>
@@ -222,7 +227,7 @@ export default function MessageList({ chatId }) {
                 </Bubble>
               </Row>
             )}
-            
+
             {/* Metadata */}
             <Meta $role={role}>
               {role}

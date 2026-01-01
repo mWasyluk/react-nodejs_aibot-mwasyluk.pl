@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { ThemeProvider } from 'styled-components';
-import { ToastProvider, useToast } from '../components/common/Toast';
+import { ToastProvider, useToast } from '../notifications/Toast';
 import { modelsRegistryService } from '../services/modelsRegistryService';
 import { THEME } from '../state/constants';
 import { darkTheme, lightTheme } from '../theme';
@@ -44,7 +44,7 @@ function ModelsBootstrapper() {
                 actions.setModelsStatusesById(statusesFromServer, { merge: true });
             } catch (e) {
                 console.error('[ModelsBootstrapper] ', e);
-                
+
                 // Show toast notification for model fetch error
                 showError(
                     e?.message || 'Failed to fetch models from server',

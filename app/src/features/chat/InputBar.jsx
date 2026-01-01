@@ -1,62 +1,173 @@
-import { Send } from '@mui/icons-material';
-import { IconButton } from '@mui/material';
+import { Send, Save, Psychology, MoreVert } from '@mui/icons-material';
+import { IconButton, Tooltip } from '@mui/material';
 import { useCallback, useRef, useState } from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { useAppState } from '../../context/AppStateContext';
 import { useI18n } from '../../hooks/useI18n';
-import { useToast } from '../../components/common/Toast';
+import { useToast } from '../../notifications/Toast';
 import { llmService } from '../../services/LLMService';
 import { isValidModelId } from '../../utils/model-util';
+import { alpha } from '../../utils/colorUtils';
+
+/* ============ STYLED COMPONENTS ============ */
 
 const Wrap = styled.div`
-  padding: 12px 14px 14px;
+  padding: 20px;
   display: flex;
-  gap: 10px;
-  align-items: flex-end;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: 20px;
+  background: ${({ theme }) => theme.palette.background.paper};
+`;
 
-  ${({ theme }) => css`
-    border-top: 1px solid ${theme.colors.border};
-    background: ${theme.colors.surface}cc;
-  `}
+const InputContainer = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border-radius: 16px;
+  padding: 8px;
+  transition: all 0.2s ease;
+  
+  &:focus-within {
+    border-color: ${({ theme }) => theme.palette.primary.main};
+    box-shadow: 0 0 0 3px ${({ theme }) => alpha(theme.palette.primary.main, 0.08)};
+  }
+`;
+
+const SparkleIcon = styled.span`
+  font-size: 18px;
+  opacity: 0.7;
+  margin-top: 2px;
+  flex-shrink: 0;
+  color: ${({ theme }) => theme.palette.primary.main};
 `;
 
 const Input = styled.textarea`
   flex: 1;
   resize: none;
-  min-height: 42px;
-  max-height: 160px;
-  border-radius: 14px;
-  padding: 10px 12px;
-  font-size: 13px;
-  line-height: 1.4;
+  min-height: 24px;
+  max-height: 120px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  line-height: 1.5;
   outline: none;
+  font-family: inherit;
+  color: ${({ theme }) => theme.palette.text.primary};
 
-  ${({ theme }) => css`
-    background: ${theme.colors.background}55;
-    border: 1px solid ${theme.colors.border};
+  &::placeholder {
+    color: ${({ theme }) => theme.palette.text.secondary};
+    opacity: 0.7;
+  }
+`;
 
-    &:focus {
-      border-color: ${theme.colors.primary};
-      box-shadow: 0 0 0 3px ${theme.colors.primary}22;
+const BottomRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+`;
+
+const LeftActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const MoreButton = styled(IconButton)`
+  && {
+    padding: 6px;
+    color: ${({ theme }) => theme.palette.text.secondary};
+    
+    &:hover {
+      background: ${({ theme }) => alpha(theme.palette.primary.main, 0.08)};
     }
-  `}
+    
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
 `;
 
-const Hint = styled.div`
-  font-size: 11px;
-  opacity: 0.65;
-  padding-left: 2px;
+const OptionButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  
+  background: ${({ theme, $active }) =>
+    $active ? theme.palette.primary.main : 'transparent'};
+  border: 1px solid ${({ theme, $active }) =>
+    $active ? theme.palette.primary.main : theme.palette.border};
+  color: ${({ theme, $active }) =>
+    $active ? theme.palette.primary.contrastText : theme.palette.text.primary};
+  
+  &:hover {
+    background: ${({ theme, $active }) =>
+    $active
+      ? (theme.palette.primary.dark || theme.palette.primary.main)
+      : alpha(theme.palette.primary.main, 0.08)};
+    border-color: ${({ theme, $active }) =>
+    $active
+      ? (theme.palette.primary.dark || theme.palette.primary.main)
+      : theme.palette.primary.main};
+  }
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
 `;
 
-const CustomIconButton = styled(IconButton)`
-  align-self: start;
+const SendButton = styled(IconButton)`
+  && {
+    width: 44px;
+    height: 44px;
+    justify-self: start;
+    background-color: ${({ theme }) => theme.palette.primary.main};
+    color: ${({ theme }) => theme.palette.primary.contrastText};
+    
+    &:hover:not(:disabled) {
+      background: ${({ theme }) => theme.palette.primary.dark || theme.palette.primary.main};
+    }
+    
+    &:disabled {
+      background-color: ${({ theme }) => theme.palette.border};
+      color: ${({ theme }) => theme.palette.text.secondary};
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
 `;
 
+/* ============ COMPONENT ============ */
+
+/**
+ * InputBar - Pole wpisywania wiadomości z opcjami.
+ * 
+ * Jeśli chatId jest null, wysłanie wiadomości tworzy nowy czat.
+ * 
+ * @param {Object} props
+ * @param {string|null} props.chatId - ID aktualnego czatu lub null
+ */
 export default function InputBar({ chatId }) {
   const { state, actions, selectors } = useAppState();
   const { t } = useI18n();
   const { showError, showWarning } = useToast();
   const [text, setText] = useState('');
+  const [saveLocal, setSaveLocal] = useState(true);
+  const [thinking, setThinking] = useState(false);
 
   const abortRef = useRef(null);
 
@@ -77,48 +188,56 @@ export default function InputBar({ chatId }) {
       return;
     }
 
+    // Jeśli nie ma aktywnego czatu, tworzymy nowy
+    let targetChatId = chatId;
+    if (!targetChatId) {
+      // Tworzymy nowy czat - tytuł zostanie ustawiony jako początek wiadomości
+      const newTitle = value.length > 50 ? value.substring(0, 47) + '...' : value;
+      targetChatId = actions.createChat({ title: newTitle });
+    }
+
     // build prompt messages using current state + the message we're about to add
-    const currentMsgs = selectors.selectMessagesForChat(state, chatId);
+    const currentMsgs = selectors.selectMessagesForChat(state, targetChatId) || [];
     const promptMsgs = [...currentMsgs, { role: 'user', content: { final: value } }];
 
-    actions.addUserMessage(chatId, value);
-    const assistantId = actions.startAssistantMessage(chatId, { modelId: model.id, status: 'thinking' });
+    actions.addUserMessage(targetChatId, value);
+    const assistantId = actions.startAssistantMessage(targetChatId, { modelId: model.id, status: 'thinking' });
 
     setText('');
 
     await llmService.streamChat({
-      chatId,
+      chatId: targetChatId,
       model,
       messages: promptMsgs,
       signal: abortRef.current.signal,
+      useThinking: thinking,
       onEvent: (ev) => {
         if (ev.type === 'thinking') {
           if (ev.full != null && ev.full !== '') {
-            actions.upsertAssistantMessage(chatId, { messageId: assistantId, status: 'thinking', contentThinking: ev.full });
+            actions.upsertAssistantMessage(targetChatId, { messageId: assistantId, status: 'thinking', contentThinking: ev.full });
           } else if (ev.delta) {
-            actions.appendAssistantThinkingDelta(chatId, assistantId, ev.delta);
+            actions.appendAssistantThinkingDelta(targetChatId, assistantId, ev.delta);
           }
           return;
         }
 
         if (ev.type === 'delta') {
           if (ev.full != null && ev.full !== '') {
-            actions.upsertAssistantMessage(chatId, { messageId: assistantId, status: 'streaming', contentFinal: ev.full });
+            actions.upsertAssistantMessage(targetChatId, { messageId: assistantId, status: 'streaming', contentFinal: ev.full });
           } else if (ev.delta) {
-            actions.appendAssistantDelta(chatId, assistantId, ev.delta);
+            actions.appendAssistantDelta(targetChatId, assistantId, ev.delta);
           }
           return;
         }
 
         if (ev.type === 'done') {
-          actions.finalizeAssistantMessage(chatId, assistantId);
+          actions.finalizeAssistantMessage(targetChatId, assistantId);
           actions.setModelStatus(model.id, 'ok');
           return;
         }
 
         if (ev.type === 'abort') {
-          // Mark message as cancelled and show toast
-          actions.cancelAssistantMessage(chatId, assistantId);
+          actions.cancelAssistantMessage(targetChatId, assistantId);
           showWarning(
             t.toastErrorStreamAborted || 'Response generation was cancelled',
             t.toastWarningTitle || 'Cancelled'
@@ -127,41 +246,92 @@ export default function InputBar({ chatId }) {
         }
 
         if (ev.type === 'error') {
-          // Show error toast
           showError(
             ev.message || t.toastErrorStreamInterrupted || 'Streaming error occurred',
             t.toastErrorTitle || 'Error'
           );
           actions.setModelStatus(model.id, 'error');
-          // Mark message as cancelled (not error state - simpler UX per requirements)
-          actions.cancelAssistantMessage(chatId, assistantId);
+          actions.cancelAssistantMessage(targetChatId, assistantId);
         }
       },
     });
-  }, [actions, chatId, selectors, state, text, showError, showWarning, t]);
+  }, [actions, chatId, selectors, state, text, thinking, showError, showWarning, t]);
 
-  const onKeyDown = (e) => {
+  const onKeyDown = useCallback((e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       send();
     }
-  };
+  }, [send]);
+
+  // Auto-resize textarea
+  const handleChange = useCallback((e) => {
+    setText(e.target.value);
+
+    // Auto resize
+    const target = e.target;
+    target.style.height = 'auto';
+    target.style.height = Math.min(target.scrollHeight, 120) + 'px';
+  }, []);
+
+  const toggleSaveLocal = useCallback(() => {
+    setSaveLocal(prev => !prev);
+  }, []);
+
+  const toggleThinking = useCallback(() => {
+    setThinking(prev => !prev);
+  }, []);
+
+  const isDisabled = !text.trim();
 
   return (
     <Wrap>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <InputContainer>
+        <SparkleIcon>✦</SparkleIcon>
         <Input
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={handleChange}
           onKeyDown={onKeyDown}
-          placeholder="Write a message…"
+          placeholder={t.inputPlaceholder || 'W czym mogę Ci dzisiaj pomóc?'}
+          rows={1}
         />
-        <Hint>{t.inputMultilineHint}</Hint>
-      </div>
 
-      <CustomIconButton onClick={send} disabled={!text.trim()}>
-        <Send />
-      </CustomIconButton>
+        <SendButton
+          onClick={send}
+          disabled={isDisabled}
+          aria-label={t.inputSend || 'Wyślij'}
+        >
+          <Send />
+        </SendButton>
+      </InputContainer>
+
+      <BottomRow>
+        <LeftActions>
+          <Tooltip disableInteractive title={t.inputMoreOptions || 'Więcej opcji'}>
+            <MoreButton size="small">
+              <MoreVert />
+            </MoreButton>
+          </Tooltip>
+
+          <OptionButton
+            $active={saveLocal}
+            onClick={toggleSaveLocal}
+            type="button"
+          >
+            <Save />
+            {t.inputSaveLocal || 'Zapis lokalny'}
+          </OptionButton>
+
+          <OptionButton
+            $active={thinking}
+            onClick={toggleThinking}
+            type="button"
+          >
+            <Psychology />
+            {t.inputThinking || 'Myślenie'}
+          </OptionButton>
+        </LeftActions>
+      </BottomRow>
     </Wrap>
   );
 }
