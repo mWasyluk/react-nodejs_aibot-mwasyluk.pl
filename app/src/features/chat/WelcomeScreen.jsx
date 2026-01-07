@@ -1,7 +1,7 @@
 import { Language } from '@mui/icons-material';
+import { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useI18n } from '../../hooks/useI18n';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { alpha } from '../../utils/colorUtils';
 
 /* ============ STYLED COMPONENTS ============ */
@@ -91,7 +91,7 @@ const Title = styled.h1`
   margin: 0 0 16px 0;
   font-size: 28px;
   font-weight: 600;
-  color: ${({ theme }) => theme.palette.text.primary};
+  color: ${({ theme }) => theme.palette.text.main};
   line-height: 1.3;
 `;
 

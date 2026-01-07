@@ -25,12 +25,12 @@ export const pl = Object.freeze({
   welcomeActionAnalyze: 'Przeanalizuj temat',
 
   // Quick action prompts
-  promptRiddle: 'Wymyśl dla mnie ciekawą zagadkę logiczną.',
-  promptAnswer: 'Mam zagadkę, pomóż mi ją rozwiązać.',
-  promptCode: 'Pomóż mi napisać kod.',
-  promptStory: 'Napisz krótkie opowiadanie.',
-  promptPlan: 'Pomóż mi przygotować plan działania.',
-  promptAnalyze: 'Przeanalizuj temat, który zaraz ci podam.',
+  promptRiddle: 'Wymyśl zagadkę logiczną o długości słów od 0 do ',
+  promptAnswer: 'Pomóż mi rozwiązać tę zagadkę logiczną:',
+  promptCode: 'Pomóż mi napisać kod, który',
+  promptStory: 'Napisz krótkie opowiadanie o',
+  promptPlan: 'Pomóż mi przygotować plan działania dotyczący',
+  promptAnalyze: 'Przeanalizuj informacje dotyczące tematu:',
 
   // InputBar
   inputPlaceholder: 'W czym mogę Ci dzisiaj pomóc?',

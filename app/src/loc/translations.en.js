@@ -31,12 +31,12 @@ export const en = Object.freeze({
   welcomeActionAnalyze: 'Analyze a topic',
 
   // Quick action prompts
-  promptRiddle: 'Create an interesting logic riddle for me.',
-  promptAnswer: 'I have a riddle, help me solve it.',
-  promptCode: 'Help me write some code.',
-  promptStory: 'Write a short story.',
-  promptPlan: 'Help me prepare an action plan.',
-  promptAnalyze: 'Analyze the topic I will give you.',
+  promptRiddle: 'Come up with a logic riddle with word length from 0 to',
+  promptAnswer: 'Help me solve this logic riddle:',
+  promptCode: 'Help me write code that',
+  promptStory: 'Write a short story about',
+  promptPlan: 'Help me prepare an action plan for',
+  promptAnalyze: 'Analyze information about the topic:',
 
   // InputBar
   inputPlaceholder: 'How can I help you today?',

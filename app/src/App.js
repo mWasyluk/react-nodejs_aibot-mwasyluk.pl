@@ -1,7 +1,7 @@
-import React from 'react';
-import styled, { css } from 'styled-components';
-import SideMenu from './features/sidebar/SideMenu';
+import styled from 'styled-components';
 import ChatFrame from './features/chat/ChatFrame';
+import SideMenu from './features/sidebar/SideMenu';
+import { alpha } from './utils/colorUtils';
 
 const Shell = styled.div`
   width: 100%;
@@ -9,46 +9,56 @@ const Shell = styled.div`
   min-height: 100vh;
   display: flex;
   align-items: stretch;
-  padding: 16px;
   position: relative;
   overflow: hidden;
-
-  ${({ theme }) => css`
-    background: ${theme.palette.background.default};
-    
-    /* Gradient glow effect for dark theme */
-    ${theme.palette.gradientGlow ? css`
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 60%;
-        background: ${theme.palette.gradientGlow};
-        pointer-events: none;
-        z-index: 0;
-      }
-    ` : ''}
-    
-    /* Subtle pattern for light theme */
-    ${!theme.palette.gradientGlow ? css`
-      background-image: 
-        radial-gradient(circle at 20% 80%, ${theme.palette.primary.main}08 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, ${theme.palette.primary.main}08 0%, transparent 50%);
-    ` : ''}
-  `}
+  background: ${({ theme }) => theme.palette.background.main};
 `;
 
 const Frame = styled.div`
   width: 100%;
-  max-width: 1400px;
+  // max-width: 1400px;
   height: 100%;
-  margin: 0 auto;
   display: flex;
   gap: 16px;
   position: relative;
   z-index: 1;
+  padding: 10px;
+  background: 
+    /* Duży niebieski - prawy górny (wychodzi poza krawędź) */
+    radial-gradient(
+      ellipse 28% 28% at 95% 18%,
+      ${({ theme }) => alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.7 : 0.85)} 0%,
+      ${({ theme }) => alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.25 : 0.35)} 45%,
+      transparent 70%
+    ),
+    /* Mały niebieski - prawy górny */
+    radial-gradient(
+      circle at 85% 38%,
+      ${({ theme }) => alpha(theme.palette.primary.dark, theme.palette.mode === 'dark' ? 0.7 : 0.85)} 0%,
+      ${({ theme }) => alpha(theme.palette.primary.dark, theme.palette.mode === 'dark' ? 0.25 : 0.35)} 10%,
+      transparent 25%
+    ),
+    /* Fioletowy górny - lewy-środek */
+    radial-gradient(
+      circle at 32% 28%,
+      ${({ theme }) => alpha(theme.palette.accent.dark, theme.palette.mode === 'dark' ? 0.6 : 0.7)} 0%,
+      ${({ theme }) => alpha(theme.palette.accent.dark, theme.palette.mode === 'dark' ? 0.15 : 0.2)} 18%,
+      transparent 32%
+    ),
+    /* Jasnoniebieski - lewy dolny (wychodzi poza krawędź) */
+    radial-gradient(
+      circle at 8% 62%,
+      ${({ theme }) => alpha(theme.palette.primary.light, theme.palette.mode === 'dark' ? 0.5 : 0.6)} 0%,
+      ${({ theme }) => alpha(theme.palette.primary.light, theme.palette.mode === 'dark' ? 0.12 : 0.18)} 15%,
+      transparent 28%
+    ),
+    /* Fioletowy dolny - środek */
+    radial-gradient(
+      circle at 62% 64%,
+      ${({ theme }) => alpha(theme.palette.accent.main, theme.palette.mode === 'dark' ? 0.5 : 0.55)} 0%,
+      ${({ theme }) => alpha(theme.palette.accent.main, theme.palette.mode === 'dark' ? 0.1 : 0.15)} 14%,
+      transparent 26%
+    );
 `;
 
 export default function App() {

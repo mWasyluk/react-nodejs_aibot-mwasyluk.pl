@@ -25,6 +25,11 @@ export const lightTheme = createTheme({
             contrastTextInactive: '#24242eff',
         },
 
+        accent: {
+            main: '#6E48BA',
+            dark: '#533492',
+        },
+
         // Kolory statusów
         error: {
             main: '#D32F2F',
@@ -49,13 +54,13 @@ export const lightTheme = createTheme({
 
         // Tła
         background: {
-            default: '#E8EEF4',
+            main: '#E8EEF4',
             paper: '#FFFFFF',
         },
 
         // Tekst
         text: {
-            primary: '#1A1A2E',
+            main: '#1A1A2E',
             secondary: '#5A6A7A',
         },
 
@@ -67,7 +72,7 @@ export const lightTheme = createTheme({
         // ========================================
         border: '#D0D9E3',
         borderLight: '#E8EEF4',
-        surface: '#FFFFFF88',
+        surface: '#FFFFFFAA',
         surfaceAlt: '#F0F4F8',
         codeBackground: '#F5F5F5',
         inputBackground: '#FFFFFF',
@@ -106,6 +111,11 @@ export const darkTheme = createTheme({
             contrastTextInactive: '#32323dff',
         },
 
+        accent: {
+            main: '#6E48BA',
+            dark: '#533492',
+        },
+
         // Kolory statusów
         error: {
             main: '#FF6B6B',
@@ -130,13 +140,13 @@ export const darkTheme = createTheme({
 
         // Tła
         background: {
-            default: '#0A0A14',
+            main: '#0A0A14',
             paper: '#141428',
         },
 
         // Tekst
         text: {
-            primary: '#E8EEF4',
+            main: '#E8EEF4',
             secondary: '#8A9CB5',
         },
 
@@ -148,7 +158,7 @@ export const darkTheme = createTheme({
         // ========================================
         border: '#2A2A45',
         borderLight: '#1F1F38',
-        surface: '#14142888',
+        surface: '#141428AA',
         surfaceAlt: '#1A1A35',
         codeBackground: '#1E1E35',
         inputBackground: '#1A1A30',

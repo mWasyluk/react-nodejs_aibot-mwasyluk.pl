@@ -1,13 +1,13 @@
-import { Send, Save, Psychology, MoreVert } from '@mui/icons-material';
+import { MoreVert, Psychology, Save, Send } from '@mui/icons-material';
 import { IconButton, Tooltip } from '@mui/material';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { useAppState } from '../../context/AppStateContext';
 import { useI18n } from '../../hooks/useI18n';
 import { useToast } from '../../notifications/Toast';
 import { llmService } from '../../services/LLMService';
-import { isValidModelId } from '../../utils/model-util';
 import { alpha } from '../../utils/colorUtils';
+import { isValidModelId } from '../../utils/model-util';
 
 /* ============ STYLED COMPONENTS ============ */
 
@@ -53,7 +53,7 @@ const Input = styled.textarea`
   line-height: 1.5;
   outline: none;
   font-family: inherit;
-  color: ${({ theme }) => theme.palette.text.primary};
+  color: ${({ theme }) => theme.palette.text.main};
 
   &::placeholder {
     color: ${({ theme }) => theme.palette.text.secondary};
@@ -106,7 +106,7 @@ const OptionButton = styled.button`
   border: 1px solid ${({ theme, $active }) =>
     $active ? theme.palette.primary.main : theme.palette.border};
   color: ${({ theme, $active }) =>
-    $active ? theme.palette.primary.contrastText : theme.palette.text.primary};
+    $active ? theme.palette.primary.contrastText : theme.palette.text.main};
   
   &:hover {
     background: ${({ theme, $active }) =>
@@ -161,11 +161,12 @@ const SendButton = styled(IconButton)`
  * @param {Object} props
  * @param {string|null} props.chatId - ID aktualnego czatu lub null
  */
-export default function InputBar({ chatId }) {
+export default function InputBar({ chatId, initialPrompt = '' }) {
   const { state, actions, selectors } = useAppState();
   const { t } = useI18n();
   const { showError, showWarning } = useToast();
-  const [text, setText] = useState('');
+  const inputFieldRef = useRef();
+  const [text, setText] = useState(initialPrompt || '');
   const [saveLocal, setSaveLocal] = useState(true);
   const [thinking, setThinking] = useState(false);
 
@@ -212,6 +213,7 @@ export default function InputBar({ chatId }) {
       signal: abortRef.current.signal,
       useThinking: thinking,
       onEvent: (ev) => {
+        console.log(ev)
         if (ev.type === 'thinking') {
           if (ev.full != null && ev.full !== '') {
             actions.upsertAssistantMessage(targetChatId, { messageId: assistantId, status: 'thinking', contentThinking: ev.full });
@@ -253,6 +255,9 @@ export default function InputBar({ chatId }) {
           actions.setModelStatus(model.id, 'error');
           actions.cancelAssistantMessage(targetChatId, assistantId);
         }
+        return () => {
+
+        }
       },
     });
   }, [actions, chatId, selectors, state, text, thinking, showError, showWarning, t]);
@@ -284,11 +289,19 @@ export default function InputBar({ chatId }) {
 
   const isDisabled = !text.trim();
 
+  useEffect(() => {
+    if (!!initialPrompt) {
+      setText(initialPrompt + ' ');
+      inputFieldRef.current.focus();
+    }
+  }, [initialPrompt])
+
   return (
     <Wrap>
       <InputContainer>
         <SparkleIcon>✦</SparkleIcon>
         <Input
+          ref={inputFieldRef}
           value={text}
           onChange={handleChange}
           onKeyDown={onKeyDown}

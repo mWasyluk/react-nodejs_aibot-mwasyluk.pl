@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import ReactMarkdown from 'react-markdown';
 
 const MarkdownContent = styled(ReactMarkdown)`
-  color: ${({ theme }) => theme.palette.text.primary};
+  color: ${({ theme }) => theme.palette.text.main};
   
   & p {
     margin-top: 0;
@@ -12,7 +12,7 @@ const MarkdownContent = styled(ReactMarkdown)`
   & h1, & h2, & h3, & h4, & h5, & h6 {
     margin-top: 1em;
     margin-bottom: 0.5em;
-    color: ${({ theme }) => theme.palette.text.primary};
+    color: ${({ theme }) => theme.palette.text.main};
   }
   
   & ul, & ol {
@@ -23,7 +23,7 @@ const MarkdownContent = styled(ReactMarkdown)`
     padding: 0 4px;
     border-radius: 4px;
     background-color: ${({ theme }) => theme.palette.codeBackground};
-    color: ${({ theme }) => theme.palette.text.primary};
+    color: ${({ theme }) => theme.palette.text.main};
     font-family: 'Fira Code', 'Consolas', monospace;
     font-size: 0.9em;
   }

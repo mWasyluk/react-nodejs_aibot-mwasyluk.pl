@@ -1,11 +1,11 @@
-import React, { useMemo, useCallback, useEffect } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useAppState } from '../../context/AppStateContext';
 import { useI18n } from '../../hooks/useI18n';
-import TopRightBar from '../topbar/TopRightBar';
 import ModelSelector from '../topbar/ModelSelector';
-import MessageList from './MessageList';
+import TopRightBar from '../topbar/TopRightBar';
 import InputBar from './InputBar';
+import MessageList from './MessageList';
 import WelcomeScreen from './WelcomeScreen';
 
 /* ============ STYLED COMPONENTS ============ */
@@ -16,25 +16,13 @@ const Wrap = styled.section`
   display: flex;
   flex-direction: column;
   min-width: 0;
+  width: 100%;
   position: relative;
   overflow: hidden;
-  padding: 20px;
+  padding: 10px;
   background: ${({ theme }) => theme.palette.surface};
-  border: 1px solid ${({ theme }) => theme.palette.border};
-  border-radius: 24px;
-
-  /* Dark mode blue glow effect from design */
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 300px;
-    background: ${({ theme }) => theme.palette.gradientGlow || 'transparent'};
-    pointer-events: none;
-    z-index: 0;
-  }
+  backdrop-filter: blur(6px);
+  border-radius: 20px;
 `;
 
 const Header = styled.header`
@@ -83,6 +71,7 @@ const Disclaimer = styled.div`
 export default function ChatFrame() {
   const { state, actions, selectors } = useAppState();
   const { t } = useI18n();
+  const [quickPrompt, setQuickPrompt] = useState('');
 
   const chat = useMemo(
     () => selectors.selectCurrentChat(state),
@@ -108,9 +97,11 @@ export default function ChatFrame() {
     const prompt = actionPrompts[actionId];
     if (prompt) {
       // Tworzymy nowy czat z domyślnym tytułem
-      const newChatId = actions.createChat({ title: prompt.substring(0, 50) });
-      // Dodajemy wiadomość użytkownika
-      actions.addUserMessage(newChatId, prompt);
+      // const newChatId = actions.createChat({ title: prompt.substring(0, 50) });
+      // // Dodajemy wiadomość użytkownika
+      // actions.addUserMessage(newChatId, prompt);
+
+      setQuickPrompt(prompt);
 
       // TODO: Tu można uruchomić streaming odpowiedzi
       // Na razie tylko tworzymy czat z wiadomością
@@ -138,7 +129,7 @@ export default function ChatFrame() {
               userName={userName}
               onActionClick={handleQuickAction}
             />
-            <InputBar chatId={null} />
+            <InputBar chatId={null} initialPrompt={quickPrompt} />
           </>
         ) : (
           <>

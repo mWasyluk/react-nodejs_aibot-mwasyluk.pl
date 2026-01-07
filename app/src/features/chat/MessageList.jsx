@@ -1,8 +1,9 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import { useAppState } from '../../context/AppStateContext';
 import { useI18n } from '../../hooks/useI18n';
 import { alpha } from '../../utils/colorUtils';
+import MarkdownContent from './MarkdownContent';
 
 /* ============ STYLED COMPONENTS ============ */
 
@@ -21,7 +22,7 @@ const Wrap = styled.div`
   
   &::-webkit-scrollbar-thumb {
     border-radius: 10px;
-    background: ${({ theme }) => alpha(theme.palette.text.primary, 0.22)};
+    background: ${({ theme }) => alpha(theme.palette.text.main, 0.22)};
   }
 `;
 
@@ -48,7 +49,7 @@ const Bubble = styled.div`
   word-break: break-word;
   line-height: 1.55;
   font-size: 13px;
-  color: ${({ theme }) => theme.palette.text.primary};
+  color: ${({ theme }) => theme.palette.text.main};
 
   ${({ theme, $role, $status }) => {
     const isUser = $role === 'user';
@@ -58,7 +59,7 @@ const Bubble = styled.div`
     // Domyślne style
     let background = isUser
       ? alpha(theme.palette.primary.main, 0.2)
-      : alpha(theme.palette.background.default, 0.55);
+      : alpha(theme.palette.background.main, 0.55);
     let borderColor = isUser
       ? alpha(theme.palette.primary.main, 0.33)
       : theme.palette.border;
@@ -223,7 +224,9 @@ export default function MessageList({ chatId }) {
             {(displayText || status === 'thinking') && (
               <Row $role={role}>
                 <Bubble $role={role} $status={status}>
-                  {displayText || (status === 'thinking' ? '...' : '')}
+                  <MarkdownContent>
+                    {displayText || (status === 'thinking' ? '...' : '')}
+                  </MarkdownContent>
                 </Bubble>
               </Row>
             )}

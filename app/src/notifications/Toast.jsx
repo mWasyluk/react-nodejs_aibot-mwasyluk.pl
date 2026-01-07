@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useCallback, useState, useMemo } from 'react';
+import { CheckCircleOutline, Close, ErrorOutline, InfoOutlined, WarningAmberOutlined } from '@mui/icons-material';
+import { IconButton, Snackbar } from '@mui/material';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
-import { Snackbar, IconButton } from '@mui/material';
-import { Close, ErrorOutline, CheckCircleOutline, WarningAmberOutlined, InfoOutlined } from '@mui/icons-material';
 
 /* ============ STYLED COMPONENTS ============ */
 
@@ -61,7 +61,7 @@ const ToastTitle = styled.div`
   line-height: 1.4;
   
   ${({ theme }) => css`
-    color: ${theme.palette.text.primary};
+    color: ${theme.palette.text.main};
   `}
 `;
 

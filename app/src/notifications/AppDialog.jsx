@@ -1,7 +1,7 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import styled, { css } from 'styled-components';
-import { Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from '@mui/material';
 import { Close } from '@mui/icons-material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from '@mui/material';
+import { useCallback, useEffect, useState } from 'react';
+import styled, { css } from 'styled-components';
 
 /* ============ STYLED COMPONENTS ============ */
 
@@ -34,7 +34,7 @@ const StyledDialogTitle = styled(DialogTitle)`
     font-weight: 700;
     
     ${({ theme }) => css`
-      color: ${theme.palette.text.primary};
+      color: ${theme.palette.text.main};
       border-bottom: 1px solid ${theme.palette.border};
     `}
   }
@@ -65,7 +65,7 @@ const StyledDialogContent = styled(DialogContent)`
     padding: 20px;
     
     ${({ theme }) => css`
-      color: ${theme.palette.text.primary};
+      color: ${theme.palette.text.main};
     `}
   }
 `;
@@ -106,9 +106,9 @@ const StyledInput = styled.input`
   transition: all 0.15s ease;
   
   ${({ theme, $hasError }) => css`
-    background: ${theme.palette.background.default};
+    background: ${theme.palette.background.main};
     border: 1px solid ${$hasError ? theme.palette.error.main : theme.palette.border};
-    color: ${theme.palette.text.primary};
+    color: ${theme.palette.text.main};
     
     &:focus {
       border-color: ${$hasError ? theme.palette.error.main : theme.palette.primary.main};
@@ -162,10 +162,10 @@ const DialogButton = styled.button`
     return css`
       background: transparent;
       border-color: ${theme.palette.border};
-      color: ${theme.palette.text.primary};
+      color: ${theme.palette.text.main};
       
       &:hover {
-        background: ${theme.palette.background.default};
+        background: ${theme.palette.background.main};
         border-color: ${theme.palette.text.secondary};
       }
     `;
@@ -178,7 +178,7 @@ const ContentText = styled.p`
   line-height: 1.6;
   
   ${({ theme }) => css`
-    color: ${theme.palette.text.primary};
+    color: ${theme.palette.text.main};
   `}
 `;
 
