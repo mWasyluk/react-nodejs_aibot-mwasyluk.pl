@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import * as rawActions from '../state/actions';
 import { initialState } from '../state/initialState';
 import * as selectors from '../state/selectors';
@@ -57,8 +57,6 @@ export function AppStateProvider({ children, storageKey = 'aibot_app_state_v1' }
     const storage = useMemo(() => createLocalStorageAdapter(storageKey), [storageKey]);
     const stateRef = useRef(null);
 
-
-    const loadedOnce = useRef(false);
     /** @type {[AppState, React.Dispatch<React.SetStateAction<AppState>>]} */
     const [state, _setState] = useState(() => {
         const loaded = storage.load();
@@ -71,7 +69,7 @@ export function AppStateProvider({ children, storageKey = 'aibot_app_state_v1' }
     const getState = () => stateRef.current;
 
     /** @param {AppState | ((prev: AppState) => AppState)} next */
-    const setState = (next) => {
+    const setState = useCallback((next) => {
         _setState((prev) => {
             const resolved = typeof next === 'function' ? next(prev) : next;
             if (shallowEqual(prev, resolved)) return prev;
@@ -79,7 +77,7 @@ export function AppStateProvider({ children, storageKey = 'aibot_app_state_v1' }
             storage.save(resolved);
             return resolved;
         });
-    };
+    }, [storage]);
 
     /** @type {AppActions} */
     const actions = useMemo(() => {
@@ -117,7 +115,7 @@ export function AppStateProvider({ children, storageKey = 'aibot_app_state_v1' }
             upsertAssistantMessage: (chatId, payload) =>
                 rawActions.upsertAssistantMessage(getState(), setState, chatId, payload),
         };
-    }, [state]);
+    }, [setState]);
 
     /** @type {AppStateContextValue} */
     const value = useMemo(() => ({ state, actions, selectors }), [state, actions]);

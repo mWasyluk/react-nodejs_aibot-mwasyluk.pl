@@ -69,7 +69,7 @@ const Disclaimer = styled.div`
 /* ============ COMPONENT ============ */
 
 export default function ChatFrame() {
-  const { state, actions, selectors } = useAppState();
+  const { state, selectors } = useAppState();
   const { t } = useI18n();
   const [quickPrompt, setQuickPrompt] = useState('');
 
@@ -78,8 +78,8 @@ export default function ChatFrame() {
     [state, selectors]
   );
 
-  const hasChat = useMemo(() => Boolean(state.chats.currentChatId && chat), [state.chats.currentChatId]);
-  const hasMessages = useMemo(() => (hasChat && Boolean(state.messages.byChatId[state.chats.currentChatId]?.length)), [hasChat, state.chats.currentChatId]);
+  const hasChat = useMemo(() => Boolean(state.chats.currentChatId && chat), [state.chats.currentChatId, chat]);
+  const hasMessages = useMemo(() => (hasChat && Boolean(state.messages.byChatId[state.chats.currentChatId]?.length)), [hasChat, state.messages.byChatId, state.chats.currentChatId]);
   const showWelcome = useMemo(() => (!hasChat || !hasMessages), [hasChat, hasMessages]);
 
   // Handler dla szybkich akcji z WelcomeScreen
@@ -106,7 +106,7 @@ export default function ChatFrame() {
       // TODO: Tu można uruchomić streaming odpowiedzi
       // Na razie tylko tworzymy czat z wiadomością
     }
-  }, [actions, t]);
+  }, [t]);
 
   const userName = t.sideUserAnonymous || 'Anonimowy';
   const disclaimer = t.inputDisclaimer || 'Wszystkie modele mogą popełniać błędy. Sprawdzaj ważne informacje.';

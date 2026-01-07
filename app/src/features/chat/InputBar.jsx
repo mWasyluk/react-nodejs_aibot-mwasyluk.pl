@@ -15,8 +15,8 @@ const Wrap = styled.div`
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  border-radius: 20px;
+  gap: 10px;
+  border-radius: 10px;
   background: ${({ theme }) => theme.palette.background.paper};
 `;
 

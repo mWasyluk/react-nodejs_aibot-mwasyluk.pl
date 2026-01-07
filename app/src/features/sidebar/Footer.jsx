@@ -3,7 +3,7 @@ import styled from 'styled-components';
 /* ============ STYLED ============ */
 
 const Wrap = styled.div`
-  display: ${({ $collapsed }) => ($collapsed ? 'none' : 'flex')};
+  display: flex;
   justify-content: center;
   gap: 4px;
   font-size: 11px;
@@ -22,12 +22,14 @@ const Wrap = styled.div`
 
 /* ============ COMPONENT ============ */
 
+const d = new Date();
+let year = d.getFullYear();
+
 export default function Footer({ isCollapsed, t }) {
-    return (
-        <Wrap $collapsed={isCollapsed}>
-            <a href="/docs">{t.sideTermsLink || 'Regulamin'}</a>
-            <span>i</span>
-            <a href="/docs">{t.sidePrivacyLink || 'polityka prywatności'}</a>
-        </Wrap>
-    );
+  return (
+    <Wrap $collapsed={isCollapsed}>
+      <span>v.{process.env.REACT_APP_VERSION}</span>
+      {!isCollapsed && (<>©{year}<a href="www.mwasyluk.pl">mwasyluk.pl</a></>)}
+    </Wrap>
+  );
 }

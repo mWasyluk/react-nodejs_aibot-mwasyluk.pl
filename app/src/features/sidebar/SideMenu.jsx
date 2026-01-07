@@ -11,13 +11,13 @@ import UserCard from './UserCard';
 /* ============ STYLED ============ */
 
 const Wrap = styled.aside`
-  width: ${({ $collapsed }) => ($collapsed ? '72px' : '320px')};
+  width: ${({ $collapsed }) => ($collapsed ? '72px' : '300px')};
   min-width: ${({ $collapsed }) => ($collapsed ? '72px' : '320px')};
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: ${({ $collapsed }) => ($collapsed ? 'center' : 'stretch')};
-  gap: ${({ $collapsed }) => ($collapsed ? '8px' : '12px')};
+  gap: 10px;
   padding: 10px;
   border-radius: 20px;
   background: ${({ theme }) => theme.palette.surface};
@@ -42,6 +42,9 @@ export default function SideMenu() {
   // === ACTIONS ===
   const onToggle = useCallback(() => {
     actions.setSideMenuOpen(isCollapsed);
+    if (!isCollapsed) {
+      setMode('recent');
+    }
   }, [actions, isCollapsed]);
 
   const onNewChat = useCallback(() => {
@@ -53,8 +56,9 @@ export default function SideMenu() {
       setMode('recent');
     } else {
       setMode(newMode);
+      actions.setSideMenuOpen(true);
     }
-  }, [mode]);
+  }, [actions, mode]);
 
   return (
     <Wrap $collapsed={isCollapsed}>

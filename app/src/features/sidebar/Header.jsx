@@ -1,23 +1,22 @@
-import {
-    Add,
-    ArchiveOutlined,
-    Menu,
-    MenuOpen,
-    Search,
-} from '@mui/icons-material';
 import { IconButton, Tooltip } from '@mui/material';
 import styled from 'styled-components';
 import { alpha } from '../../utils/colorUtils';
 
 import logoImage from '../../assets/images/logo.png';
 import logomarkImage from '../../assets/images/logomark.png';
+import { ReactComponent as ArchiveIcon } from '../../assets/svg/archive.svg';
+import { ReactComponent as AddChatIcon } from '../../assets/svg/new-chat.svg';
+import { ReactComponent as SearchIcon } from '../../assets/svg/search.svg';
+import { ReactComponent as SideMenuIcon } from '../../assets/svg/side-menu.svg';
+
 
 /* ============ STYLED ============ */
 
 const Wrap = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  gap: 5px;
   width: 100%;
 `;
 
@@ -25,14 +24,35 @@ const TopRow = styled.div`
   height: 48px;
   width: 100%;
   display: flex;
-  justify-content: ${({ $collapsed }) => ($collapsed ? 'center' : 'space-between')};
+  justify-content: ${({ $collapsed }) => ($collapsed ? 'left' : 'space-between')};
   align-items: center;
+  margin-bottom: 10px;
+
+  svg {
+    width: 32px;
+    height: 32px;
+    color: ${({ theme }) => theme.palette.primary.main};
+  }
+`;
+
+const CollapseSideMenuButton = styled(IconButton)`
+    && {
+        transition: all 0.2s ease-out;
+
+        &:hover {
+            background-color: ${({ theme }) => alpha(theme.palette.primary.main, 0.1)};
+        }
+    
+        &:active {
+            background-color: ${({ theme }) => alpha(theme.palette.primary.main, 0.3)};
+        }
+    }
+
 `;
 
 const LogoImage = styled.img`
   max-height: 48px;
   height: 48px;
-  max-width: 220px;
   display: ${({ $collapsed }) => ($collapsed ? 'none' : 'block')};
 `;
 
@@ -41,13 +61,14 @@ const LogomarkImage = styled.img`
   height: 48px;
   cursor: pointer;
   display: ${({ $collapsed }) => ($collapsed ? 'block' : 'none')};
+  justify-self: left;
 `;
 
 const NewChatButton = styled.button`
   width: 100%;
   height: 48px;
   padding: 0 ${({ $collapsed }) => ($collapsed ? '0' : '20px')};
-  border-radius: 20px;
+  border-radius: 999px;
   border: 1px solid transparent;
   display: flex;
   align-items: center;
@@ -58,16 +79,21 @@ const NewChatButton = styled.button`
   font-weight: 600;
   transition: all 0.15s ease;
   background: ${({ theme }) => theme.palette.surface};
+  color: ${({ theme }) => theme.palette.primary.dark};
 
   &:hover {
-    background: ${({ theme }) => alpha(theme.palette.common?.white || '#FFFFFF', 0.5)};
-    border-color: ${({ theme }) => alpha(theme.palette.primary.main, 0.25)};
+    background: ${({ theme }) => alpha(theme.palette.primary.main, 0.1)};
+  }
+
+  &:active {
+    background: ${({ theme }) => alpha(theme.palette.primary.main, 0.3)};
   }
 
   svg {
     width: 20px;
     height: 20px;
     flex-shrink: 0;
+    color: ${({ theme }) => theme.palette.primary.dark};
   }
 
   span {
@@ -75,17 +101,9 @@ const NewChatButton = styled.button`
   }
 `;
 
-const TabsRow = styled.div`
-  display: flex;
-  flex-direction: ${({ $collapsed }) => ($collapsed ? 'column' : 'row')};
-  gap: 8px;
-  align-items: center;
-  width: 100%;
-`;
-
 const TabButton = styled.button`
   height: 36px;
-  border-radius: 20px;
+  border-radius: 10px;
   border: 1px solid transparent;
   display: flex;
   align-items: center;
@@ -99,29 +117,29 @@ const TabButton = styled.button`
   gap: ${({ $collapsed }) => ($collapsed ? '0' : '6px')};
   width: ${({ $collapsed }) => ($collapsed ? '36px' : 'auto')};
   min-width: ${({ $collapsed }) => ($collapsed ? '36px' : 'auto')};
+  width: fit-content;
 
   background: ${({ theme, $active }) =>
-        $active ? alpha(theme.palette.primary.main, 0.1) : 'transparent'};
-  border-color: ${({ theme, $active }) =>
-        $active ? alpha(theme.palette.primary.main, 0.1) : 'transparent'};
+    $active ? alpha(theme.palette.primary.main, 0.2) : 'transparent'};
   color: ${({ theme, $active }) =>
-        $active ? theme.palette.primary.main : theme.palette.text.main};
+    $active ? theme.palette.primary.dark : theme.palette.text.main};
 
   &:hover {
-    background: ${({ theme, $active }) =>
-        $active
-            ? alpha(theme.palette.primary.main, 0.1)
-            : alpha(theme.palette.common?.white || '#FFFFFF', 0.5)};
-    border-color: ${({ theme, $active }) =>
-        $active
-            ? alpha(theme.palette.primary.main, 0.1)
-            : alpha(theme.palette.primary.main, 0.25)};
+    background: ${({ theme }) => alpha(theme.palette.primary.main, 0.1)};
+    color: ${({ theme, $active }) =>
+    $active ? theme.palette.primary.main : theme.palette.text.main};
+  }
+
+  &:active {
+    background: ${({ theme }) => alpha(theme.palette.primary.main, 0.3)};
   }
 
   svg {
     width: 20px;
     height: 20px;
     flex-shrink: 0;
+    color: ${({ theme, $active }) =>
+    $active ? theme.palette.primary.dark : theme.palette.text.main};
   }
 
   span {
@@ -132,84 +150,79 @@ const TabButton = styled.button`
 /* ============ COMPONENT ============ */
 
 export default function Header({
-    isCollapsed,
-    mode,
-    onToggle,
-    onNewChat,
-    onSetMode,
-    t,
+  isCollapsed,
+  mode,
+  onToggle,
+  onNewChat,
+  onSetMode,
+  t,
 }) {
-    const menuIcon = isCollapsed
-        ? <Menu sx={{ width: 20, height: 20 }} />
-        : <MenuOpen sx={{ width: 20, height: 20 }} />;
 
-    const toggleTooltip = isCollapsed ? t.sideOpenMenuTooltip : t.sideCollapseTooltip;
+  return (
+    <Wrap>
+      {/* Logo + Toggle */}
+      <TopRow $collapsed={isCollapsed}>
+        <LogoImage src={logoImage} $collapsed={isCollapsed} />
+        <LogomarkImage
+          src={logomarkImage}
+          $collapsed={isCollapsed}
+          onClick={onToggle}
+        />
+        {!isCollapsed && (
+          <Tooltip disableInteractive title={t.sideCollapseTooltip}>
+            <CollapseSideMenuButton onClick={onToggle} size="small" disableTouchRipple>
+              <SideMenuIcon />
+            </CollapseSideMenuButton>
+          </Tooltip>
+        )}
+      </TopRow>
 
-    return (
-        <Wrap>
-            {/* Logo + Toggle */}
-            <TopRow $collapsed={isCollapsed}>
-                <LogoImage src={logoImage} $collapsed={isCollapsed} />
-                <LogomarkImage
-                    src={logomarkImage}
-                    $collapsed={isCollapsed}
-                    onClick={onToggle}
-                />
-                {!isCollapsed && (
-                    <Tooltip disableInteractive title={toggleTooltip}>
-                        <IconButton onClick={onToggle} size="small">
-                            {menuIcon}
-                        </IconButton>
-                    </Tooltip>
-                )}
-            </TopRow>
+      {/* New Chat Button */}
+      <Tooltip
+        disableInteractive
+        title={isCollapsed ? t.sideNewChatTooltip : ''}
+        placement="right"
+      >
+        <NewChatButton onClick={onNewChat} type="button" $collapsed={isCollapsed}>
+          <AddChatIcon />
+          {/* <AddChatIcon /> */}
+          {/* </AddChatIconWrap> */}
+          <span>{t.sideNewChatButton || 'NOWY CHAT'}</span>
+        </NewChatButton>
+      </Tooltip>
 
-            {/* New Chat Button */}
-            <Tooltip
-                disableInteractive
-                title={isCollapsed ? t.sideNewChatTooltip : ''}
-                placement="right"
-            >
-                <NewChatButton onClick={onNewChat} type="button" $collapsed={isCollapsed}>
-                    <Add />
-                    <span>{t.sideNewChatButton || 'NOWY CHAT'}</span>
-                </NewChatButton>
-            </Tooltip>
+      {/* Tabs: Search / Archive */}
+      <Tooltip
+        disableInteractive
+        title={isCollapsed ? t.sideSearchTooltip : ''}
+        placement="right"
+      >
+        <TabButton
+          $active={mode === 'search'}
+          $collapsed={isCollapsed}
+          onClick={() => onSetMode('search')}
+          type="button"
+        >
+          <SearchIcon />
+          <span>{t.sideSearchButton || 'SZUKAJ'}</span>
+        </TabButton>
+      </Tooltip>
 
-            {/* Tabs: Search / Archive */}
-            <TabsRow $collapsed={isCollapsed}>
-                <Tooltip
-                    disableInteractive
-                    title={isCollapsed ? t.sideSearchTooltip : ''}
-                    placement="right"
-                >
-                    <TabButton
-                        $active={mode === 'search'}
-                        $collapsed={isCollapsed}
-                        onClick={() => onSetMode('search')}
-                        type="button"
-                    >
-                        <Search />
-                        <span>{t.sideSearchButton || 'SZUKAJ'}</span>
-                    </TabButton>
-                </Tooltip>
-
-                <Tooltip
-                    disableInteractive
-                    title={isCollapsed ? t.sideArchiveTooltip : ''}
-                    placement="right"
-                >
-                    <TabButton
-                        $active={mode === 'archive'}
-                        $collapsed={isCollapsed}
-                        onClick={() => onSetMode('archive')}
-                        type="button"
-                    >
-                        <ArchiveOutlined />
-                        <span>{t.sideArchiveButton || 'ARCHIWUM'}</span>
-                    </TabButton>
-                </Tooltip>
-            </TabsRow>
-        </Wrap>
-    );
+      <Tooltip
+        disableInteractive
+        title={isCollapsed ? t.sideArchiveTooltip : ''}
+        placement="right"
+      >
+        <TabButton
+          $active={mode === 'archive'}
+          $collapsed={isCollapsed}
+          onClick={() => onSetMode('archive')}
+          type="button"
+        >
+          <ArchiveIcon />
+          <span>{t.sideArchiveButton || 'ARCHIWUM'}</span>
+        </TabButton>
+      </Tooltip>
+    </Wrap>
+  );
 }

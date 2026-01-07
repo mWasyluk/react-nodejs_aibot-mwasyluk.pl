@@ -1,31 +1,29 @@
 import { Person } from '@mui/icons-material';
 import styled from 'styled-components';
-import { alpha } from '../../utils/colorUtils';
 
 /* ============ STYLED ============ */
 
 const Wrap = styled.div`
   width: 100%;
-  height: ${({ $collapsed }) => ($collapsed ? '52px' : '64px')};
-  padding: ${({ $collapsed }) => ($collapsed ? '0' : '0 16px 0 0')};
-  border-radius: ${({ $collapsed }) => ($collapsed ? '50%' : '999px')};
+  padding: ${({ $collapsed }) => ($collapsed ? '5px 2px' : '5px')};
+  border-radius: 999px;
   display: flex;
   align-items: center;
-  justify-content: ${({ $collapsed }) => ($collapsed ? 'center' : 'flex-start')};
+  justify-content: flex-start;
   gap: ${({ $collapsed }) => ($collapsed ? '0' : '12px')};
-  background: ${({ theme }) => theme.palette.surface};
-  border: 1px solid ${({ theme }) => theme.palette.border};
+  background: ${({ theme }) => theme.palette.background.paper};
+  transition: padding 0.2s ease-in-out;
 `;
 
 const Avatar = styled.div`
-  width: ${({ $collapsed }) => ($collapsed ? '52px' : '64px')};
-  height: ${({ $collapsed }) => ($collapsed ? '52px' : '64px')};
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${({ theme }) => alpha(theme.palette.primary.main, 0.13)};
-  color: ${({ theme }) => theme.palette.primary.main};
+  background: ${({ theme }) => theme.palette.primary.main};
+  color: ${({ theme }) => theme.palette.background.main};
   flex-shrink: 0;
 
   svg {
@@ -46,26 +44,30 @@ const UserName = styled.div`
   font-size: 13px;
   font-weight: 600;
   color: ${({ theme }) => theme.palette.text.main};
+  overflow: hidden;
+  white-space: nowrap;
 `;
 
 const Hint = styled.div`
   font-size: 11px;
   color: ${({ theme }) => theme.palette.text.secondary};
   opacity: 0.6;
+  overflow: hidden;
+  white-space: nowrap;
 `;
 
 /* ============ COMPONENT ============ */
 
 export default function UserCard({ isCollapsed, t }) {
-    return (
-        <Wrap $collapsed={isCollapsed}>
-            <Avatar $collapsed={isCollapsed}>
-                <Person />
-            </Avatar>
-            <Info $collapsed={isCollapsed}>
-                <UserName>{t.sideUserAnonymousTitle || 'Anonimowy Użytkownik'}</UserName>
-                <Hint>{t.sideUserLocalData}</Hint>
-            </Info>
-        </Wrap>
-    );
+  return (
+    <Wrap $collapsed={isCollapsed}>
+      <Avatar $collapsed={isCollapsed}>
+        <Person />
+      </Avatar>
+      <Info $collapsed={isCollapsed}>
+        <UserName>{t.sideUserAnonymousTitle || 'Anonimowy Użytkownik'}</UserName>
+        <Hint>{t.sideUserLocalData}</Hint>
+      </Info>
+    </Wrap>
+  );
 }

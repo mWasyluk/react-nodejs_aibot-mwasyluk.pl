@@ -33,7 +33,7 @@ export const lightTheme = createTheme({
         // Kolory statusów
         error: {
             main: '#D32F2F',
-            light: '#FFEBEE',
+            light: '#e09d9dff',
             dark: '#C62828',
         },
         success: {
@@ -95,9 +95,9 @@ export const darkTheme = createTheme({
 
         // Kolory główne
         primary: {
-            main: '#4DA3FF',
-            light: '#6BB5FF',
-            dark: '#2D8BF0',
+            main: '#1976D2',
+            light: '#42A5F5',
+            dark: '#1565C0',
             contrastText: '#0A0A14',
             contrastTextInactive: '#32323dff',
         },

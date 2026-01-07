@@ -1,6 +1,7 @@
 import { Language } from '@mui/icons-material';
 import { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import logomarkImage from '../../assets/images/logomark.png';
 import { useI18n } from '../../hooks/useI18n';
 import { alpha } from '../../utils/colorUtils';
 
@@ -17,63 +18,10 @@ const Wrap = styled.div`
   overflow: auto;
 `;
 
-const Avatar = styled.div`
+const Avatar = styled.img`
   width: 120px;
   height: 120px;
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  
-  /* Glitch/distortion effect like in the design */
-  &::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: ${({ theme }) => theme.palette.primary.main};
-    opacity: 0.2;
-    filter: blur(20px);
-  }
-`;
-
-const AvatarInner = styled.div`
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  background: ${({ theme }) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark || theme.palette.primary.main} 100%)`};
-  box-shadow: ${({ theme }) => `0 4px 20px ${alpha(theme.palette.primary.main, 0.25)}, inset 0 -2px 10px rgba(0,0,0,0.2)`};
-  
-  /* Face-like design from screenshot */
-  &::before {
-    content: '';
-    position: absolute;
-    width: 60%;
-    height: 8px;
-    top: 40%;
-    left: 20%;
-    border-radius: 4px;
-    background: ${({ theme }) => theme.palette.primary.contrastText};
-  }
-  
-  &::after {
-    content: '';
-    position: absolute;
-    width: 30%;
-    height: 6px;
-    bottom: 35%;
-    left: 35%;
-    border-radius: 3px;
-    background: ${({ theme }) => theme.palette.primary.contrastText};
-    opacity: 0.7;
-  }
+  margin-bottom: 20px;
 `;
 
 const Greeting = styled.div`
@@ -179,9 +127,7 @@ export default function WelcomeScreen({ onActionClick, userName = 'Anonimowy' })
 
   return (
     <Wrap>
-      <Avatar>
-        <AvatarInner />
-      </Avatar>
+      <Avatar src={logomarkImage} />
 
       <Greeting>
         {t.welcomeGreeting || 'Witaj,'} <UserName>{userName}</UserName>
