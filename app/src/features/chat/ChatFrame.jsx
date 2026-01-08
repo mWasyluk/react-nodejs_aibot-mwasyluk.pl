@@ -6,6 +6,7 @@ import ModelSelector from '../topbar/ModelSelector';
 import TopRightBar from '../topbar/TopRightBar';
 import InputBar from './InputBar';
 import MessageList from './MessageList';
+import { getActionById, getActionPrompt } from './quickactions.config';
 import WelcomeScreen from './WelcomeScreen';
 
 /* ============ STYLED COMPONENTS ============ */
@@ -70,7 +71,7 @@ const Disclaimer = styled.div`
 
 export default function ChatFrame() {
   const { state, selectors } = useAppState();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [quickPrompt, setQuickPrompt] = useState('');
 
   const chat = useMemo(
@@ -84,29 +85,13 @@ export default function ChatFrame() {
 
   // Handler dla szybkich akcji z WelcomeScreen
   const handleQuickAction = useCallback((actionId) => {
-    // Mapowanie akcji na prompty
-    const actionPrompts = {
-      riddle: t.promptRiddle || 'Wymyśl dla mnie ciekawą zagadkę logiczną.',
-      answer: t.promptAnswer || 'Mam zagadkę, pomóż mi ją rozwiązać.',
-      code: t.promptCode || 'Pomóż mi napisać kod.',
-      story: t.promptStory || 'Napisz krótkie opowiadanie.',
-      plan: t.promptPlan || 'Pomóż mi przygotować plan działania.',
-      analyze: t.promptAnalyze || 'Przeanalizuj temat, który zaraz ci podam.',
-    };
+    const action = getActionById(actionId);
 
-    const prompt = actionPrompts[actionId];
-    if (prompt) {
-      // Tworzymy nowy czat z domyślnym tytułem
-      // const newChatId = actions.createChat({ title: prompt.substring(0, 50) });
-      // // Dodajemy wiadomość użytkownika
-      // actions.addUserMessage(newChatId, prompt);
-
+    if (action) {
+      const prompt = getActionPrompt(action, t, lang);
       setQuickPrompt(prompt);
-
-      // TODO: Tu można uruchomić streaming odpowiedzi
-      // Na razie tylko tworzymy czat z wiadomością
     }
-  }, [t]);
+  }, [t, lang]);
 
   const userName = t.sideUserAnonymous || 'Anonimowy';
   const disclaimer = t.inputDisclaimer || 'Wszystkie modele mogą popełniać błędy. Sprawdzaj ważne informacje.';

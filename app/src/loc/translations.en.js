@@ -23,21 +23,20 @@ export const en = Object.freeze({
   welcomeGreeting: 'Tell me,',
   welcomeTitle: 'What shall we start with today?',
   welcomeSubtitle: 'Choose one of the options to start a chat with a predefined action, or type your own command in the field below.',
-  welcomeActionRiddle: 'Create a logic riddle',
-  welcomeActionAnswer: 'Answer a riddle',
-  welcomeActionCode: 'Write code',
-  welcomeActionStory: 'Write a story',
-  welcomeActionPlan: 'Prepare an action plan',
-  welcomeActionAnalyze: 'Analyze a topic',
 
-  // Quick action prompts
-  promptRiddle: 'Come up with a logic riddle with word length from 0 to',
-  promptAnswer: 'Help me solve this logic riddle:',
-  promptCode: 'Help me write code that',
-  promptStory: 'Write a short story about',
-  promptPlan: 'Help me prepare an action plan for',
-  promptAnalyze: 'Analyze information about the topic:',
+  // Welcome Actions (button labels)
+  welcomeActionSurprise: 'Surprise me',
+  welcomeActionTeach: 'Be my teacher',
+  welcomeActionChallenge: 'Challenge my opinion',
+  welcomeActionWhatIf: 'What if...',
+  welcomeActionConnect: 'Connect the dots',
 
+  // Welcome Actions (prompts)
+  promptSurprise: 'Tell me something fascinating about',
+  promptTeach: 'Teach me the basics of this topic in 5 minutes:',
+  promptChallenge: 'Find counterarguments to my opinion:',
+  promptWhatIf: 'What would happen if',
+  promptConnect: 'What is the connection between',
   // InputBar
   inputPlaceholder: 'How can I help you today?',
   inputSend: 'Send',

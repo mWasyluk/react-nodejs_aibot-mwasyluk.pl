@@ -1,9 +1,10 @@
-import { Language } from '@mui/icons-material';
-import { useCallback, useMemo } from 'react';
+import { AutoAwesome, Help, Hub, Psychology, School } from '@mui/icons-material';
+import { useCallback } from 'react';
 import styled from 'styled-components';
 import logomarkImage from '../../assets/images/logomark.png';
 import { useI18n } from '../../hooks/useI18n';
 import { alpha } from '../../utils/colorUtils';
+import { QUICK_ACTIONS, getActionLabel } from './quickactions.config';
 
 /* ============ STYLED COMPONENTS ============ */
 
@@ -28,18 +29,19 @@ const Greeting = styled.div`
   margin-bottom: 8px;
   font-size: 24px;
   font-weight: 400;
-  color: ${({ theme }) => theme.palette.primary.main};
+  color: ${({ theme }) => alpha(theme.palette.primary.dark, 0.7)};
 `;
 
 const UserName = styled.span`
   font-weight: 700;
+  color: ${({ theme }) => theme.palette.primary.main};
 `;
 
 const Title = styled.h1`
   margin: 0 0 16px 0;
   font-size: 28px;
   font-weight: 600;
-  color: ${({ theme }) => theme.palette.text.main};
+  color: ${({ theme }) => alpha(theme.palette.primary.dark, 0.7)};
   line-height: 1.3;
 `;
 
@@ -47,7 +49,7 @@ const Subtitle = styled.p`
   margin: 0 0 32px 0;
   max-width: 440px;
   font-size: 14px;
-  color: ${({ theme }) => theme.palette.text.secondary};
+  color: ${({ theme }) => alpha(theme.palette.primary.dark, 0.6)};
   line-height: 1.6;
 `;
 
@@ -68,33 +70,50 @@ const ActionButton = styled.button`
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
-  transition: all 0.2s ease;
-  background: transparent;
-  border: 1px solid ${({ theme }) => alpha(theme.palette.primary.main, 0.3)};
-  color: ${({ theme }) => theme.palette.primary.main};
-  
+  background: ${({ theme }) => alpha(theme.palette.primary.main, 0.1)};
+  border: 0;
+
+  &, & * {
+    transition: all 0.2s ease-out;
+  }
+
   &:hover {
-    background: ${({ theme }) => theme.palette.primary.main};
+    background: ${({ theme }) => alpha(theme.palette.primary.main, 0.2)};
     border-color: ${({ theme }) => theme.palette.primary.main};
-    color: ${({ theme }) => theme.palette.primary.contrastText};
     transform: translateY(-1px);
   }
   
   &:active {
-    transform: translateY(0);
+    background: ${({ theme }) => alpha(theme.palette.primary.main, 0.3)};
+  }
+
+  &:active, &:active * {
+    color: ${({ theme }) => theme.palette.mode === 'dark' ? theme.palette.text.primary : theme.palette.primary.contrastText};
   }
   
   svg {
     width: 18px;
     height: 18px;
   }
-`;
 
-const GlobeIcon = styled(Language)`
-  && {
-    color: inherit;
+  &, svg {
+    color: ${({ theme }) => theme.palette.primary.main};
   }
 `;
+
+/* ============ ICON MAPPING ============ */
+const ICON_MAP = {
+  surprise: AutoAwesome,
+  teach: School,
+  challenge: Psychology,
+  whatif: Help,
+  connect: Hub,
+};
+
+const getIcon = (iconId) => {
+  const IconComponent = ICON_MAP[iconId];
+  return IconComponent ? <IconComponent /> : null;
+};
 
 /* ============ COMPONENT ============ */
 
@@ -105,19 +124,8 @@ const GlobeIcon = styled(Language)`
  * @param {function} [props.onActionClick] - Callback wywoływany po kliknięciu akcji szybkiej
  * @param {string} [props.userName] - Nazwa użytkownika do wyświetlenia
  */
-
-
 export default function WelcomeScreen({ onActionClick, userName = 'Anonimowy' }) {
-  const { t } = useI18n();
-
-  const quickActions = useMemo(() => [
-    { id: 'riddle', label: t.welcomeActionRiddle || 'Wymyśl zagadkę logiczną' },
-    { id: 'answer', label: t.welcomeActionAnswer || 'Odpowiedz na zagadkę' },
-    { id: 'code', label: t.welcomeActionCode || 'Napisz kod' },
-    { id: 'story', label: t.welcomeActionStory || 'Napisz opowiadanie' },
-    { id: 'plan', label: t.welcomeActionPlan || 'Przygotuj plan działania' },
-    { id: 'analyze', label: t.welcomeActionAnalyze || 'Przeanalizuj temat' },
-  ], [t]);
+  const { t, lang } = useI18n();
 
   const handleActionClick = useCallback((actionId) => {
     if (onActionClick) {
@@ -140,14 +148,14 @@ export default function WelcomeScreen({ onActionClick, userName = 'Anonimowy' })
       </Subtitle>
 
       <ActionsGrid>
-        {quickActions.map((action) => (
+        {QUICK_ACTIONS.map((action) => (
           <ActionButton
             key={action.id}
             onClick={() => handleActionClick(action.id)}
             type="button"
           >
-            <GlobeIcon />
-            {action.label}
+            {getIcon(action.iconId)}
+            {getActionLabel(action, t, lang)}
           </ActionButton>
         ))}
       </ActionsGrid>

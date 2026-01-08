@@ -17,20 +17,20 @@ export const pl = Object.freeze({
   welcomeGreeting: 'Powiedz mi,',
   welcomeTitle: 'Od czego zaczniemy tym razem?',
   welcomeSubtitle: 'Wybierz jedną z opcji, aby rozpocząć czat od zdefiniowanej akcji, lub wpisz swoją własną komendę w oknie poniżej.',
-  welcomeActionRiddle: 'Wymyśl zagadkę logiczną',
-  welcomeActionAnswer: 'Odpowiedz na zagadkę',
-  welcomeActionCode: 'Napisz kod',
-  welcomeActionStory: 'Napisz opowiadanie',
-  welcomeActionPlan: 'Przygotuj plan działania',
-  welcomeActionAnalyze: 'Przeanalizuj temat',
 
-  // Quick action prompts
-  promptRiddle: 'Wymyśl zagadkę logiczną o długości słów od 0 do ',
-  promptAnswer: 'Pomóż mi rozwiązać tę zagadkę logiczną:',
-  promptCode: 'Pomóż mi napisać kod, który',
-  promptStory: 'Napisz krótkie opowiadanie o',
-  promptPlan: 'Pomóż mi przygotować plan działania dotyczący',
-  promptAnalyze: 'Przeanalizuj informacje dotyczące tematu:',
+  // Welcome Actions (button labels)
+  welcomeActionSurprise: 'Zaskocz mnie',
+  welcomeActionTeach: 'Zostań moim nauczycielem',
+  welcomeActionChallenge: 'Podważ moje zdanie',
+  welcomeActionWhatIf: 'Co by było gdyby...',
+  welcomeActionConnect: 'Połącz kropki',
+
+  // Welcome Actions (prompts)
+  promptSurprise: 'Powiedz mi coś fascynującego o',
+  promptTeach: 'Naucz mnie podstaw tego tematu w 5 minut:',
+  promptChallenge: 'Znajdź kontrargumenty do mojej opinii:',
+  promptWhatIf: 'Co by się stało, gdyby',
+  promptConnect: 'Jaki jest związek między',
 
   // InputBar
   inputPlaceholder: 'W czym mogę Ci dzisiaj pomóc?',
