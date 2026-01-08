@@ -45,9 +45,16 @@ const Frame = styled.div`
       ${({ theme }) => alpha(theme.palette.accent.dark, theme.palette.mode === 'dark' ? 0.15 : 0.2)} 18%,
       transparent 32%
     ),
+    /* Fioletowy lewy górny */
+    radial-gradient(
+      circle at -5% 10%,
+      ${({ theme }) => alpha(theme.palette.accent.dark, theme.palette.mode === 'dark' ? 0.5 : 0.3)} 0%,
+      ${({ theme }) => alpha(theme.palette.accent.dark, theme.palette.mode === 'dark' ? 0.25 : 0.2)} 15%,
+      transparent 32%
+    ),
     /* Jasnoniebieski - lewy dolny (wychodzi poza krawędź) */
     radial-gradient(
-      circle at 8% 62%,
+      circle at 8% 82%,
       ${({ theme }) => alpha(theme.palette.primary.light, theme.palette.mode === 'dark' ? 0.5 : 0.6)} 0%,
       ${({ theme }) => alpha(theme.palette.primary.light, theme.palette.mode === 'dark' ? 0.12 : 0.18)} 15%,
       transparent 28%
